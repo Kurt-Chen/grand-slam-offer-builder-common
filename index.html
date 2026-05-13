@@ -1600,7 +1600,7 @@ function updateBonusTotal() {
   const multEl = document.getElementById('value-multiple');
   if (price > 0 && total > 0) {
     const m = (total / price).toFixed(1);
-    multEl.innerHTML = `<span style="color:${+m>=3?'var(--green)':+m>=2?'#60A5FA':'var(--orange)';}">${m}x</span>`;
+    multEl.innerHTML = `<span style="color:${+m>=3?'var(--green)':+m>=2?'#60A5FA':'var(--orange)'}">${m}x</span>`;
   } else {
     multEl.innerHTML = '<span>-</span>';
   }
