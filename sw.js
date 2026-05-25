@@ -1,5 +1,6 @@
-const CACHE = 'dmsb-v1';
-const ASSETS = ['/', '/index.html', '/manifest.json'];
+const CACHE = 'dmsb-v2';
+const BASE = '/grand-slam-offer-builder-claude-/';
+const ASSETS = [BASE, BASE + 'index.html', BASE + 'manifest.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
