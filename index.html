@@ -4,6 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>大满贯报价制作系统 | 基于 Alex Hormozi《100M Offers》</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#C8860A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="大满贯报价">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+    }
+  </script>
   <style>
     /* ==================== BASE ==================== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
