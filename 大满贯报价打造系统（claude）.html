@@ -1,0 +1,2341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>大满贯报价制作系统 | 基于 Alex Hormozi《100M Offers》</title>
+  <style>
+    /* ==================== BASE ==================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold: #C8860A;
+      --gold-dark: #A06808;
+      --gold-light: #FFF8E7;
+      --bg: #F5F6FA;
+      --bg2: #ECEEF5;
+      --card: #FFFFFF;
+      --card2: #F0F2F8;
+      --border: #DDE0EC;
+      --text: #1A1D2E;
+      --muted: #7B82A0;
+      --accent: #4F6EF5;
+      --green: #16A34A;
+      --red: #DC2626;
+      --orange: #EA580C;
+      --r: 12px;
+      --r2: 20px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    /* ==================== HEADER ==================== */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(245,246,250,0.96);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: 860px; margin: 0 auto;
+      padding: 12px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { display: flex; flex-direction: column; }
+    .logo-title {
+      font-size: 18px; font-weight: 800;
+      background: linear-gradient(135deg, var(--gold), #FFA040);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .logo-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .step-indicator { font-size: 13px; color: var(--muted); }
+    .step-indicator span { color: var(--gold); font-weight: 700; }
+    .progress-track {
+      height: 3px; background: var(--border);
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ==================== LAYOUT ==================== */
+    main { max-width: 860px; margin: 0 auto; padding: 32px 20px; }
+
+    /* ==================== STEP CONTAINER ==================== */
+    .step { display: none; }
+    .step.active { display: block; animation: slideUp 0.35s ease; }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==================== STEP HEADER ==================== */
+    .step-head {
+      text-align: center; margin-bottom: 32px;
+    }
+    .step-icon { font-size: 52px; margin-bottom: 10px; display: block; }
+    .step-title { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .step-desc { color: var(--muted); font-size: 15px; max-width: 500px; margin: 0 auto; }
+
+    /* ==================== CARDS ==================== */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 15px; font-weight: 700;
+      color: var(--gold); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .insight-box {
+      background: linear-gradient(135deg, rgba(245,197,24,0.08), rgba(245,197,24,0.03));
+      border: 1px solid rgba(245,197,24,0.25);
+      border-radius: var(--r);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .insight-box p { font-size: 14px; color: #C8CADC; line-height: 1.7; }
+    .insight-box strong { color: var(--gold); }
+
+    /* ==================== FORMS ==================== */
+    label.field-label {
+      display: block; font-size: 13px;
+      color: var(--muted); margin-bottom: 6px; font-weight: 500;
+    }
+    input[type=text], input[type=number], textarea, select {
+      width: 100%;
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--gold); }
+    textarea { resize: vertical; min-height: 80px; }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+    .field { margin-bottom: 16px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 540px) { .field-row { grid-template-columns: 1fr; } }
+
+    /* ==================== BUTTONS ==================== */
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      color: #000; font-weight: 800; font-size: 15px;
+      padding: 12px 32px; border: none; border-radius: var(--r);
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,197,24,0.35); }
+    .btn-ghost {
+      background: transparent; color: var(--muted); font-size: 15px;
+      padding: 12px 24px; border: 1.5px solid var(--border);
+      border-radius: var(--r); cursor: pointer; transition: all 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--text); }
+    .btn-danger {
+      background: transparent; color: var(--red);
+      border: 1px solid rgba(239,68,68,0.3); border-radius: 8px;
+      padding: 4px 10px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.1); }
+    .btn-add {
+      background: transparent; color: var(--gold);
+      border: 1.5px dashed rgba(245,197,24,0.4); border-radius: var(--r);
+      padding: 10px 20px; font-size: 14px; cursor: pointer;
+      width: 100%; transition: all 0.2s;
+    }
+    .btn-add:hover { background: rgba(245,197,24,0.05); border-color: var(--gold); }
+    .btn-small {
+      background: var(--card2); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; padding: 6px 14px;
+      font-size: 13px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-small:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
+
+    /* ==================== TAGS ==================== */
+    .tag-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag {
+      padding: 6px 14px; background: var(--card2);
+      border: 1.5px solid var(--border); border-radius: 24px;
+      font-size: 13px; cursor: pointer; transition: all 0.2s; user-select: none;
+    }
+    .tag:hover { border-color: var(--gold); color: var(--gold); }
+    .tag.active { background: rgba(245,197,24,0.15); border-color: var(--gold); color: var(--gold); font-weight: 700; }
+
+    /* ==================== MARKET CARDS ==================== */
+    .market-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    @media (max-width: 540px) { .market-grid { grid-template-columns: 1fr; } }
+    .market-card {
+      background: var(--card2); border: 2px solid var(--border);
+      border-radius: var(--r); padding: 16px; text-align: center;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .market-card:hover { border-color: var(--gold); }
+    .market-card.active {
+      border-color: var(--gold);
+      background: rgba(245,197,24,0.1);
+    }
+    .market-card .icon { font-size: 32px; margin-bottom: 6px; }
+    .market-card .name { font-weight: 700; font-size: 15px; }
+    .market-card .sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+    /* ==================== PRINCIPLE CARDS ==================== */
+    .principle-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    @media (max-width: 540px) { .principle-grid { grid-template-columns: 1fr; } }
+    .principle-card {
+      background: var(--bg2); border-radius: var(--r); padding: 14px; text-align: center;
+    }
+    .principle-card .p-icon { font-size: 26px; margin-bottom: 6px; }
+    .principle-card .p-name { font-size: 13px; font-weight: 700; }
+    .principle-card .p-desc { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* ==================== VALUE EQUATION ==================== */
+    .value-eq-formula {
+      font-size: 17px; font-weight: 700; text-align: center;
+      padding: 16px; background: var(--bg2); border-radius: var(--r); margin-bottom: 20px;
+    }
+    .eq-num { color: var(--green); }
+    .eq-den { color: var(--red); }
+    .eq-result { color: var(--gold); }
+    .slider-group { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 540px) { .slider-group { grid-template-columns: 1fr; } }
+    .slider-section-title {
+      font-size: 13px; font-weight: 700; margin-bottom: 14px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .slider-item { margin-bottom: 18px; }
+    .slider-label-row {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 6px;
+    }
+    .slider-label { font-size: 13px; color: var(--muted); }
+    .slider-value { font-size: 20px; font-weight: 800; }
+    .slider-value.up { color: var(--green); }
+    .slider-value.down { color: var(--red); }
+    input[type=range] {
+      width: 100%; -webkit-appearance: none; appearance: none;
+      height: 6px; border-radius: 3px; background: var(--border);
+      outline: none; border: none; padding: 0;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 20px; height: 20px;
+      border-radius: 50%; cursor: pointer;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      box-shadow: 0 0 8px rgba(245,197,24,0.5);
+    }
+    input[type=range].red::-webkit-slider-thumb { background: linear-gradient(135deg, #c0392b, var(--red)); box-shadow: 0 0 8px rgba(239,68,68,0.5); }
+    .slider-hints { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 3px; }
+    .score-display {
+      background: var(--bg2); border-radius: var(--r2);
+      padding: 24px; text-align: center; margin-top: 20px;
+    }
+    .score-number {
+      font-size: 72px; font-weight: 900; line-height: 1;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .score-label { font-size: 16px; font-weight: 700; margin-top: 6px; }
+    .score-bar-track {
+      height: 8px; background: var(--border); border-radius: 4px; margin-top: 16px; overflow: hidden;
+    }
+    .score-bar-fill {
+      height: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, var(--red), var(--orange), var(--gold), var(--green));
+      transition: width 0.4s ease;
+    }
+
+    /* ==================== PROBLEMS ==================== */
+    .problem-input-row { display: flex; gap: 10px; margin-bottom: 12px; }
+    .problem-input-row input { flex: 1; }
+    .problems-list { display: flex; flex-direction: column; gap: 8px; }
+    .problem-item {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 10px 14px;
+    }
+    .problem-num { color: var(--gold); font-weight: 700; font-size: 13px; min-width: 24px; }
+    .problem-text { flex: 1; font-size: 14px; }
+    .empty-state { text-align: center; color: var(--muted); padding: 32px; font-size: 14px; }
+
+    /* ==================== SOLUTIONS ==================== */
+    .solution-item {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 16px; margin-bottom: 12px;
+    }
+    .solution-problem-ref {
+      font-size: 11px; color: var(--muted); margin-bottom: 8px;
+      padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    }
+    .solution-fields { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; }
+    select.delivery-type { width: 140px; }
+
+    /* ==================== PRICING ==================== */
+    .price-input-wrap { position: relative; }
+    .price-prefix {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-weight: 700; pointer-events: none;
+    }
+    .price-input-wrap input { padding-left: 30px; }
+    .pricing-analysis {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px; background: var(--border);
+      border-radius: var(--r); overflow: hidden; margin-top: 16px;
+    }
+    .pricing-stat {
+      background: var(--bg2); padding: 14px; text-align: center;
+    }
+    .pricing-stat .stat-label { font-size: 11px; color: var(--muted); }
+    .pricing-stat .stat-val { font-size: 22px; font-weight: 800; margin-top: 2px; }
+
+    /* ==================== BONUSES ==================== */
+    .bonus-item {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 18px; margin-bottom: 12px;
+    }
+    .bonus-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .bonus-badge {
+      background: rgba(245,197,24,0.15); color: var(--gold);
+      border: 1px solid rgba(245,197,24,0.3);
+      font-size: 12px; font-weight: 700;
+      padding: 3px 10px; border-radius: 12px;
+    }
+    .bonus-fields { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 10px; }
+    .bonus-value-input { width: 120px; }
+    .bonus-total-bar {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 4px;
+    }
+    .bonus-total-bar .label { font-size: 14px; color: var(--muted); }
+    .bonus-total-bar .value { font-size: 24px; font-weight: 800; color: var(--gold); }
+    .value-multiple { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .value-multiple span { font-weight: 700; }
+
+    /* ==================== GUARANTEES ==================== */
+    .guarantee-options { display: flex; flex-direction: column; gap: 10px; }
+    .guarantee-option {
+      background: var(--card2); border: 2px solid var(--border);
+      border-radius: var(--r); padding: 16px; cursor: pointer; transition: all 0.2s;
+    }
+    .guarantee-option:hover { border-color: rgba(245,197,24,0.5); }
+    .guarantee-option.active { border-color: var(--gold); background: rgba(245,197,24,0.07); }
+    .g-header { display: flex; align-items: center; gap: 10px; }
+    .g-icon { font-size: 22px; }
+    .g-title { font-weight: 700; font-size: 15px; }
+    .g-desc { font-size: 13px; color: var(--muted); margin-top: 4px; padding-left: 32px; }
+    .g-badge { font-size: 11px; margin-top: 4px; padding-left: 32px; }
+
+    /* ==================== SCARCITY ==================== */
+    .sc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .sc-grid { grid-template-columns: 1fr; } }
+    .sc-card { background: var(--card2); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; }
+    .sc-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+    .sc-title.blue { color: #60A5FA; }
+    .sc-title.orange { color: var(--orange); }
+    .sc-option { margin-bottom: 14px; }
+    .sc-option-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .sc-option-header input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--gold); flex-shrink: 0; }
+    .sc-option-label { font-size: 13px; font-weight: 600; }
+    .sc-option input[type=text] { font-size: 12px; margin-top: 4px; }
+
+    /* ==================== NAMING ==================== */
+    .magic-letters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .magic-letter {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 12px 16px; flex: 1; min-width: 140px;
+    }
+    .ml-badge {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      color: #000; font-weight: 900; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 6px;
+    }
+    .ml-name { font-size: 12px; font-weight: 700; }
+    .ml-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .name-preview {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px; text-align: center; margin: 16px 0;
+    }
+    .name-preview .label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .name-preview .generated {
+      font-size: 22px; font-weight: 900;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold), #FFA040);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    /* ==================== FINAL OFFER DOCUMENT ==================== */
+    #step-final { display: none; }
+    #step-final.active { display: block; animation: slideUp 0.4s ease; }
+    .offer-doc {
+      background: var(--card);
+      border: 2px solid var(--gold);
+      border-radius: var(--r2);
+      box-shadow: 0 0 60px rgba(245,197,24,0.15), inset 0 0 60px rgba(245,197,24,0.02);
+      overflow: hidden;
+    }
+    .offer-doc-header {
+      background: linear-gradient(135deg, #FFF8E7, #FFF3D0);
+      border-bottom: 1px solid rgba(245,197,24,0.3);
+      padding: 40px 40px 32px;
+      text-align: center;
+    }
+    .offer-eyebrow {
+      font-size: 11px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 12px;
+    }
+    .offer-main-title {
+      font-size: 36px; font-weight: 900; line-height: 1.15; letter-spacing: -1px;
+      background: linear-gradient(135deg, #1A1D2E, #3A3D5C);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 12px;
+    }
+    .offer-tagline { font-size: 16px; color: var(--muted); }
+    .offer-doc-body { padding: 36px 40px; }
+    @media (max-width: 600px) { .offer-doc-header { padding: 28px 20px; } .offer-doc-body { padding: 24px 20px; } }
+    .offer-section { margin-bottom: 32px; }
+    .offer-section-title {
+      font-size: 13px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+    }
+    .offer-section-title::after {
+      content: ''; flex: 1; height: 1px; background: rgba(245,197,24,0.2);
+    }
+    .outcome-box {
+      background: rgba(245,197,24,0.05); border: 1px solid rgba(245,197,24,0.2);
+      border-radius: var(--r); padding: 16px 20px;
+    }
+    .outcome-box p { font-size: 15px; line-height: 1.7; color: #C8CADC; }
+    .solution-row {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 16px; background: var(--bg2); border-radius: var(--r);
+      margin-bottom: 8px;
+    }
+    .solution-num {
+      min-width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(245,197,24,0.15); color: var(--gold);
+      font-size: 12px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .solution-content .s-name { font-weight: 700; font-size: 14px; }
+    .solution-content .s-prob { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .bonus-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 12px 16px; background: var(--bg2); border-radius: var(--r); margin-bottom: 8px;
+    }
+    .bonus-left { display: flex; align-items: flex-start; gap: 10px; }
+    .bonus-tag-icon { font-size: 18px; }
+    .bonus-info .b-name { font-weight: 700; font-size: 14px; }
+    .bonus-info .b-desc { font-size: 12px; color: var(--muted); }
+    .bonus-price { font-size: 16px; font-weight: 800; color: var(--gold); white-space: nowrap; margin-left: 12px; }
+    .value-stack-row {
+      display: flex; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+    }
+    .value-stack-row .item-name { color: var(--muted); }
+    .value-stack-row .item-price { font-weight: 600; }
+    .value-total-row {
+      display: flex; justify-content: space-between; padding-top: 12px;
+      font-size: 18px; font-weight: 800;
+    }
+    .value-total-row .total-price { color: var(--gold); }
+    .price-hero {
+      background: linear-gradient(135deg, rgba(245,197,24,0.1), rgba(245,197,24,0.05));
+      border: 1px solid rgba(245,197,24,0.3);
+      border-radius: var(--r2); padding: 28px; text-align: center; margin-bottom: 24px;
+    }
+    .price-hero .ph-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .price-hero .ph-price {
+      font-size: 54px; font-weight: 900; line-height: 1;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .price-hero .ph-payment { font-size: 14px; color: var(--muted); margin-top: 8px; }
+    .guarantee-block {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px;
+    }
+    .guarantee-block .g-text { font-size: 14px; color: #C8CADC; line-height: 1.7; }
+    .scarcity-block {
+      background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.25);
+      border-radius: var(--r); padding: 20px;
+    }
+    .scarcity-block .s-text { font-size: 14px; color: #C8CADC; line-height: 1.7; }
+    .offer-footer {
+      border-top: 1px solid var(--border); padding: 16px 40px;
+      text-align: center; font-size: 11px; color: var(--muted);
+    }
+    .action-bar {
+      display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 24px;
+    }
+
+    /* ==================== STEP DOTS ==================== */
+    .dots-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(245,246,250,0.96); backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      padding: 12px; display: flex; justify-content: center; gap: 6px;
+      z-index: 50;
+    }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--border); transition: all 0.3s; cursor: pointer;
+    }
+    .dot.active { background: var(--gold); width: 24px; border-radius: 4px; }
+    .dot.done { background: var(--gold-dark); opacity: 0.6; }
+
+    /* ==================== RESPONSIVE FIXES ==================== */
+    @media (max-width: 480px) {
+      .step-title { font-size: 22px; }
+      .score-number { font-size: 52px; }
+    }
+
+    /* ==================== PRINT ==================== */
+    @media print {
+      header, .dots-nav, .no-print { display: none !important; }
+      body { background: white; color: black; }
+      .offer-doc { border-color: #000; box-shadow: none; }
+      .offer-doc-header { background: #f5f5f5; }
+    }
+
+    /* ==================== AI FEATURES ==================== */
+    .btn-ai {
+      background: linear-gradient(135deg, #5B21B6, #7C3AED);
+      color: #fff; font-weight: 700; font-size: 14px;
+      padding: 10px 20px; border: none; border-radius: var(--r);
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-ai:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
+    .btn-ai:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+    @keyframes ai-spin { to { transform: rotate(360deg); } }
+    .ai-spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: ai-spin 0.7s linear infinite; flex-shrink: 0;
+    }
+    .ai-result-box {
+      background: linear-gradient(135deg, rgba(91,33,182,0.05), rgba(124,58,237,0.02));
+      border: 1px solid rgba(124,58,237,0.25); border-radius: var(--r);
+      padding: 16px; margin-top: 12px; font-size: 14px; line-height: 1.8;
+      white-space: pre-wrap; color: var(--text);
+    }
+    .ai-result-header {
+      font-size: 12px; font-weight: 700; color: #7C3AED;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    }
+    /* AI Modal */
+    .ai-modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+      z-index: 200; align-items: center; justify-content: center; padding: 20px;
+    }
+    .ai-modal-overlay.open { display: flex; }
+    .ai-modal {
+      background: var(--card); border-radius: var(--r2); padding: 32px;
+      max-width: 560px; width: 100%; max-height: 85vh; overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+      border: 1px solid rgba(124,58,237,0.2);
+    }
+    .ai-modal-title {
+      font-size: 22px; font-weight: 800; margin-bottom: 6px;
+      background: linear-gradient(135deg, #5B21B6, #7C3AED);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .ai-modal-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+    .ai-names-grid { display: grid; gap: 8px; margin: 12px 0; }
+    .ai-name-option {
+      background: var(--bg2); border: 1.5px solid var(--border);
+      border-radius: var(--r); padding: 12px 16px; cursor: pointer;
+      transition: all 0.2s; font-size: 15px; font-weight: 700;
+    }
+    .ai-name-option:hover { border-color: #7C3AED; background: rgba(124,58,237,0.05); }
+    .ai-name-option.selected { border-color: #7C3AED; background: rgba(124,58,237,0.1); color: #5B21B6; }
+    /* Chat Widget */
+    .chat-fab {
+      position: fixed; bottom: 68px; right: 20px; z-index: 150;
+      width: 52px; height: 52px; border-radius: 50%;
+      background: linear-gradient(135deg, #5B21B6, #7C3AED);
+      border: none; cursor: pointer; font-size: 22px;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.45);
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+    }
+    .chat-fab:hover { transform: scale(1.1); }
+    .chat-panel {
+      position: fixed; bottom: 132px; right: 20px; z-index: 149;
+      width: 360px; height: 480px;
+      background: var(--card); border-radius: var(--r2);
+      border: 1px solid rgba(124,58,237,0.2);
+      box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+      display: none; flex-direction: column; overflow: hidden;
+      animation: slideUp 0.25s ease;
+    }
+    .chat-panel.open { display: flex; }
+    .chat-header {
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(135deg, #5B21B6, #7C3AED); flex-shrink: 0;
+    }
+    .chat-header-title { font-weight: 700; font-size: 14px; color: #fff; }
+    .chat-header-sub { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 1px; }
+    .chat-close {
+      background: none; border: none; color: rgba(255,255,255,0.8);
+      font-size: 20px; cursor: pointer; line-height: 1; padding: 0; flex-shrink: 0;
+    }
+    .chat-close:hover { color: #fff; }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 14px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .chat-msg { max-width: 88%; font-size: 13px; line-height: 1.65; }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #5B21B6, #7C3AED);
+      color: #fff; border-radius: 14px 14px 2px 14px; padding: 9px 13px;
+    }
+    .chat-msg.ai {
+      align-self: flex-start; background: var(--bg2);
+      border: 1px solid var(--border); border-radius: 14px 14px 14px 2px;
+      padding: 9px 13px; white-space: pre-wrap;
+    }
+    .chat-input-area {
+      padding: 10px 12px; border-top: 1px solid var(--border);
+      display: flex; gap: 8px; background: var(--card); flex-shrink: 0;
+    }
+    .chat-input-area input {
+      flex: 1; font-size: 13px; padding: 8px 12px; border-radius: 20px;
+      border: 1.5px solid var(--border); background: var(--bg2); outline: none;
+      min-width: 0;
+    }
+    .chat-input-area input:focus { border-color: #7C3AED; }
+    .chat-send-btn {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #5B21B6, #7C3AED);
+      border: none; color: #fff; cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center; transition: opacity 0.2s;
+    }
+    .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    @media (max-width: 480px) {
+      .chat-panel { width: calc(100vw - 32px); right: 16px; }
+      .chat-fab { right: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-title">大满贯报价制作系统</div>
+      <div class="logo-sub">Alex Hormozi · $100M Offers 方法论</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="step-indicator">第 <span id="cur-step">1</span> 步 / 共 10 步</div>
+      <button class="btn-ai" style="font-size:12px;padding:6px 12px;border-radius:8px" onclick="openQuickGenModal()">⚡ AI一键生成</button>
+    </div>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill" style="width:10%"></div>
+  </div>
+</header>
+
+<main>
+
+<!-- ================================================================
+  STEP 1: 选择市场
+================================================================ -->
+<div class="step active" id="step-1">
+  <div class="step-head">
+    <span class="step-icon">🎯</span>
+    <h2 class="step-title">选择你的利基市场</h2>
+    <p class="step-desc">大满贯报价的基础：找到痛苦最深、购买力最强的目标市场</p>
+  </div>
+
+  <div class="insight-box">
+    <p><strong>Hormozi 法则：</strong>进入一个有购买力、有强烈痛苦、正在增长的市场。你不需要创造需求，只需要把自己放在一个已经存在的渴望面前。任何人都可以在合适的市场里成功，再聪明的人也很难在错误的市场里成功。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📌 三大永恒市场（任选其一）</div>
+    <div class="market-grid" id="market-grid">
+      <div class="market-card active" data-market="health" onclick="selectMarket(this,'health')">
+        <div class="icon">💪</div>
+        <div class="name">健康</div>
+        <div class="sub">减肥 · 健身 · 疾病 · 心理</div>
+      </div>
+      <div class="market-card" data-market="wealth" onclick="selectMarket(this,'wealth')">
+        <div class="icon">💎</div>
+        <div class="name">财富</div>
+        <div class="sub">赚钱 · 投资 · 副业 · 创业</div>
+      </div>
+      <div class="market-card" data-market="relationships" onclick="selectMarket(this,'relationships')">
+        <div class="icon">❤️</div>
+        <div class="name">关系</div>
+        <div class="sub">感情 · 婚姻 · 社交 · 育儿</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">你的具体利基（越细分越好）</label>
+      <input type="text" id="niche" placeholder="例：帮助30-45岁职场宝妈在不节食的前提下产后瘦身">
+    </div>
+    <div class="field">
+      <label class="field-label">理想客户画像（详细描述）</label>
+      <textarea id="avatar" rows="4" placeholder="年龄、职业、收入水平、主要痛点、过去的失败经历、最大的梦想...&#10;&#10;例：35岁宝妈，二胎后体重增加了20斤，试过多种减肥方法但都反弹，对节食痛苦但缺乏运动时间，最渴望穿回孕前的衣服并在家庭聚会中获得认可"></textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✅ 市场选择检验</div>
+    <div class="principle-grid">
+      <div class="principle-card">
+        <div class="p-icon">💰</div>
+        <div class="p-name">有购买力</div>
+        <div class="p-desc">他们有钱且愿意为解决问题付费</div>
+      </div>
+      <div class="principle-card">
+        <div class="p-icon">😤</div>
+        <div class="p-name">痛苦够深</div>
+        <div class="p-desc">问题已经影响到日常生活质量</div>
+      </div>
+      <div class="principle-card">
+        <div class="p-icon">📈</div>
+        <div class="p-name">市场增长</div>
+        <div class="p-desc">是成长趋势，不是夕阳行业</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-nav">
+    <div></div>
+    <button class="btn-gold" onclick="nextStep()">下一步：定义梦想结果 →</button>
+  </div>
+</div>
+
+
+<!-- ================================================================
+  STEP 2: 梦想结果
+================================================================ -->
+<div class="step" id="step-2">
+  <div class="step-head">
+    <span class="step-icon">🌟</span>
+    <h2 class="step-title">定义梦想结果</h2>
+    <p class="step-desc">你卖的不是产品，而是结果。客户购买的是改变后的自己</p>
+  </div>
+
+  <div class="insight-box">
+    <p><strong>"没有人想要钻头，他们想要的是墙上的那个洞。"</strong> 更深一步——他们真正想要的，是挂在那个洞上的那幅画，以及看到那幅画时感受到的自豪感。你的报价越能触碰到这个情感层面的渴望，就越有价值。</p>
+  </div>
+
+  <div class="card">
+    <div class="field">
+      <label class="field-label">客户最渴望的首要结果（具体、可量化）</label>
+      <input type="text" id="primary-goal" placeholder="例：90天内减掉15斤，腰围缩小5cm，穿上婚前的连衣裙">
+    </div>
+    <div class="field">
+      <label class="field-label">达成目标前后的状态对比</label>
+      <textarea id="transformation" rows="5" placeholder="【之前】现在的痛苦状态：&#10;例：每天盯着镜子里的自己感到沮丧，拒绝拍照，不敢去游泳池，丈夫的目光让她感到不安全感...&#10;&#10;【之后】达成目标后的状态：&#10;例：自信穿上比基尼出行，闺蜜纷纷问她秘诀，丈夫开始主动夸她，重新找回了自我价值感..."></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">实现目标的理想时间框架</label>
+      <div class="tag-group" id="timeframe-tags">
+        <span class="tag" onclick="selectTag(this,'timeframe')">7天</span>
+        <span class="tag" onclick="selectTag(this,'timeframe')">30天</span>
+        <span class="tag active" onclick="selectTag(this,'timeframe')">90天</span>
+        <span class="tag" onclick="selectTag(this,'timeframe')">6个月</span>
+        <span class="tag" onclick="selectTag(this,'timeframe')">12个月</span>
+      </div>
+      <input type="text" id="timeframe-custom" placeholder="或填写自定义时间框架..." style="margin-top:10px">
+    </div>
+    <div class="field">
+      <label class="field-label">次要收益（购买后的额外好处）</label>
+      <input type="text" id="secondary-goals" placeholder="例：精力提升、睡眠改善、获得家人认可、重拾自信心">
+    </div>
+
+    <button class="btn-ai" id="ai-btn-step2" onclick="aiSuggestStep2()" style="width:100%;margin-top:4px">✨ AI 建议：根据利基自动填写梦想结果</button>
+    <div class="ai-result-box" id="ai-result-step2" style="display:none"></div>
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn-ghost" onclick="prevStep()">← 上一步</button>
+    <button class="btn-gold" onclick="nextStep()">下一步：价值方程 →</button>
+  </div>
+</div>
+
+
+<!-- ================================================================
+  STEP 3: 价值方程
+================================================================ -->
+<div class="step" id="step-3">
+  <div class="step-head">
+    <span class="step-icon">⚡</span>
+    <h2 class="step-title">价值方程计算器</h2>
+    <p class="step-desc">理解Hormozi的核心公式，设计让客户无法拒绝的高感知价值</p>
+  </div>
+
+  <div class="card">
+    <div class="value-eq-formula">
+      <span class="eq-result">价值</span> =
+      <span class="eq-num">(梦想结果 × 成功概率)</span>
+      <span style="color:var(--muted)"> ÷ </span>
+      <span class="eq-den">(时间成本 × 付出努力)</span>
+    </div>
+    <p style="font-size:13px;color:var(--muted);text-align:center">提高分子 = 提升价值感 ｜ 降低分母 = 降低阻力 ｜ 两者结合 = 大满贯报价</p>
+  </div>
+
+  <div class="card">
+    <div class="slider-group">
+      <div>
+        <div class="slider-section-title" style="color:var(--green)">⬆ 提高这些（分子）</div>
+        <div class="slider-item">
+          <div class="slider-label-row">
+            <span class="slider-label">梦想结果吸引力</span>
+            <span class="slider-value up" id="v-dream">5</span>
+          </div>
+          <input type="range" id="sl-dream" min="1" max="10" value="5" oninput="calcValue()">
+          <div class="slider-hints"><span>可有可无</span><span>极度渴望</span></div>
+        </div>
+        <div class="slider-item">
+          <div class="slider-label-row">
+            <span class="slider-label">客户相信能成功的概率</span>
+            <span class="slider-value up" id="v-prob">5</span>
+          </div>
+          <input type="range" id="sl-prob" min="1" max="10" value="5" oninput="calcValue()">
+          <div class="slider-hints"><span>完全不信</span><span>100%确信</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="slider-section-title" style="color:var(--red)">⬇ 降低这些（分母）</div>
+        <div class="slider-item">
+          <div class="slider-label-row">
+            <span class="slider-label">等待见效时间</span>
+            <span class="slider-value down" id="v-time">5</span>
+          </div>
+          <input type="range" class="red" id="sl-time" min="1" max="10" value="5" oninput="calcValue()">
+          <div class="slider-hints"><span>立刻见效</span><span>等待很久</span></div>
+        </div>
+        <div class="slider-item">
+          <div class="slider-label-row">
+            <span class="slider-label">客户需要付出的努力</span>
+            <span class="slider-value down" id="v-effort">5</span>
+          </div>
+          <input type="range" class="red" id="sl-effort" min="1" max="10" value="5" oninput="calcValue()">
+          <div class="slider-hints"><span>几乎零努力</span><span>极难坚持</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-display">
+      <div class="score-number" id="score-num">5.0</div>
+      <div class="score-label" id="score-label">一般报价</div>
+      <div class="score-bar-track">
+        <div class="score-bar-fill" id="score-bar" style="width:50%"></div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:12px">目标：分数 ≥ 8.0 才算大满贯级别</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔧 你打算如何改善各项指标？</div>
+    <div class="field">
+      <label class="field-label">如何让梦想结果更具体、更诱人</label>
+      <input type="text" id="improve-dream" placeholder="例：提供真实成功案例视频、精确数字承诺（减15斤而不是"变苗条"）">
+    </div>
+    <div class="field">
+      <label class="field-label">如何提升客户相信自己能成功的信心</label>
+      <input type="text" id="improve-prob" placeholder="例：展示学员成功率数据、行业专家背书、逐步小成功设计">
+    </div>
+    <div class="field">
+      <label class="field-label">如何缩短看到结果的时间</label>
+      <input type="text" id="improve-time" placeholder="例：快速启动模块（72小时内看到第一个变化）、立即行动清单">
+    </div>
+    <div class="field">
+      <label class="field-label">如何减少客户需要付出的努力和麻烦</label>
+      <input type="text" id="improve-effort" placeholder="例：完整的"拎包入住"系统、全套模板、专属教练跟进、24小时答疑群">
+    </div>
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn-ghost" onclick="prevStep()">← 上一步</button>
+    <button class="btn-gold" onclick="nextStep()">下一步：挖掘障碍 →</button>
+  </div>
+</div>
+
+
+<!-- ================================================================
+  STEP 4: 障碍挖掘
+================================================================ -->
+<div class="step" id="step-4">
+  <div class="step-head">
+    <span class="step-icon">🔍</span>
+    <h2 class="step-title">挖掘所有障碍</h2>
+    <p class="step-desc">列出客户在追求梦想结果途中会遇到的所有问题和借口</p>
+  </div>
+
+  <div class="insight-box">
+    <p>Hormozi 的方法是：列出客户可能遇到的<strong>每一个</strong>障碍，然后为每个障碍设计一个解决方案。障碍越多，你的解决方案就越全面，报价就越有价值。目标：找出 8-15 个障碍。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💡 四类障碍维度</div>
+    <div class="principle-grid">
+      <div class="principle-card">
+        <div class="p-icon">👁</div>
+        <div class="p-name">外部问题</div>
+        <div class="p-desc">看得见、测量得到的实际问题</div>
+      </div>
+      <div class="principle-card">
+        <div class="p-icon">🧠</div>
+        <div class="p-name">内部问题</div>
+        <div class="p-desc">自我怀疑、负面信念、情绪障碍</div>
+      </div>
+      <div class="principle-card">
+        <div class="p-icon">⏰</div>
+        <div class="p-name">实际障碍</div>
+        <div class="p-desc">时间、金钱、资源不足</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="problem-input-row">
+      <input type="text" id="problem-input" placeholder="输入一个障碍或顾虑..." onkeydown="if(event.key==='Enter')addProblem()">
+      <button class="btn-gold" onclick="addProblem()" style="white-space:nowrap">+ 添加</button>
+    </div>
+    <button class="btn-ai" id="ai-btn-step4" onclick="aiSuggestObstacles()" style="width:100%;margin-bottom:16px">✨ AI 建议：根据你的利基生成10个核心障碍</button>
+
+    <div class="card-title" style="margin-bottom:10px">⚡ 常见障碍（点击快速添加）</div>
+    <div class="tag-group" style="margin-bottom:20px" id="suggestion-tags">
+      <span class="tag" onclick="quickAdd('没有时间执行')">没有时间</span>
+      <span class="tag" onclick="quickAdd('不知道从哪里开始')">不知从哪开始</span>
+      <span class="tag" onclick="quickAdd('过去尝试过但失败了')">曾经失败过</span>
+      <span class="tag" onclick="quickAdd('缺乏自律和动力')">缺乏自律</span>
+      <span class="tag" onclick="quickAdd('信息太多太混乱，不知道该信谁')">信息过载</span>
+      <span class="tag" onclick="quickAdd('担心坚持不下去')">难以坚持</span>
+      <span class="tag" onclick="quickAdd('担心花了钱没效果')">担心浪费钱</span>
+      <span class="tag" onclick="quickAdd('没有人监督和支持')">缺少支持</span>
+      <span class="tag" onclick="quickAdd('觉得自己情况特殊，方法不适合自己')">情况特殊</span>
+      <span class="tag" onclick="quickAdd('家人不支持')">家人不支持</span>
+      <span class="tag" onclick="quickAdd('基础太差，怕跟不上')">基础太差</span>
+      <span class="tag" onclick="quickAdd('害怕副作用或不良影响')">担心副作用</span>
+    </div>
+
+    <div class="problems-list" id="problems-list">
+      <div class="empty-state" id="problems-empty">还没有添加障碍，建议至少添加 8 个</div>
+    </div>
+    <div style="margin-top:10px;font-size:13px;color:var(--muted)">
+      已添加 <strong style="color:var(--gold)" id="problem-count">0</strong> 个障碍（建议 8-15 个）
+    </div>
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn-ghost" onclick="prevStep()">← 上一步</button>
+    <button class="btn-gold" onclick="nextStep()">下一步：设计解决方案 →</button>
+  </div>
+</div>
+
+
+<!-- ================================================================
+  STEP 5: 解决方案堆叠
+================================================================ -->
+<div class="step" id="step-5">
+  <div class="step-head">
+    <span class="step-icon">🧩</span>
+    <h2 class="step-title">解决方案堆叠</h2>
+    <p class="step-desc">为每个障碍设计解决方案，并选择最优交付方式</p>
+  </div>
+
+  <div class="insight-box">
+    <p>为每个问题匹配一个解决方案，这些方案合在一起就是你的核心产品。<strong>选择最有效的交付方式</strong>——不一定是成本最高的，而是对客户最有价值、对你成本最可控的组合。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📦 交付方式参考</div>
+    <div class="principle-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="principle-card"><div class="p-icon">📹</div><div class="p-name">录播视频</div></div>
+      <div class="principle-card"><div class="p-icon">📞</div><div class="p-name">1对1辅导</div></div>
+      <div class="principle-card"><div class="p-icon">📋</div><div class="p-name">模板工具</div></div>
+      <div class="principle-card"><div class="p-icon">👥</div><div class="p-name">社群支持</div></div>
+      <div class="principle-card"><div class="p-icon">🤖</div><div class="p-name">自动化系统</div></div>
+      <div class="principle-card"><div class="p-icon">📖</div><div class="p-name">电子书/手册</div></div>
+    </div>
+  </div>
+
+  <div id="solutions-container"></div>
+
+  <div class="card">
+    <div class="card-title">➕ 额外核心模块（不对应特定问题）</div>
+    <div class="problem-input-row">
+      <input type="text" id="extra-sol-input" placeholder="额外模块名称..." onkeydown="if(event.key==='Enter')addExtraSolution()">
+      <button class="btn-gold" onclick="addExtraSolution()" style="white-space:nowrap">+ 添加</button>
+    </div>
+    <div id="extra-solutions-list"></div>
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn-ghost" onclick="prevStep()">← 上一步</button>
+    <button class="btn-gold" onclick="nextStep()">下一步：溢价定价 →</button>
+  </div>
+</div>
+
+
+<!-- ================================================================
+  STEP 6: 定价策略
+================================================================ -->
+<div class="step" id="step-6">
+  <div class="step-head">
+    <span class="step-icon">💰</span>
+    <h2 class="step-title">溢价定价策略</h2>
+    <p class="step-desc">永远不要竞争价格，要竞争价值</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💡 Hormozi 定价三原则</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:12px;background:var(--bg2);border-radius:var(--r);padding:14px">
+        <span style="font-size:20px">🚫</span>
+        <div><div style="font-weight:700;font-size:14px">永远不要做最便宜的那个</div><div style="font-size:12px;color:var(--muted);margin-top:3px">低价吸引来的是最难伺候、忠诚度最低的客户</div></div>
+      </div>
+      <div style="display:flex;gap:12px;background:var(--bg2);border-radius:var(--r);padding:14px">
+        <span style="font-size:20px">💎</span>
+        <div><div style="font-weight:700;font-size:14px">高价格=高价值信号</div><div style="font-size:12px;color:var(--muted);margin-top:3px">定价本身就是一种承诺，告诉客户"我能帮你实现结果"</div></div>
+      </div>
+      <div style="display:flex;gap:12px;background:var(--bg2);border-radius:var(--r);padding:14px">
+        <span style="font-size:20px">📊</span>
+        <div><div style="font-weight:700;font-size:14px">按价值定价，而非按成本定价</div><div style="font-size:12px;color:var(--muted);margin-top:3px">你的价格应该是你创造价值的一小部分，不是成本的倍数</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label">你的交付成本（每个客户）</label>
+        <div class="price-input-wrap">
+          <span class="price-prefix">¥</span>
+          <input type="number" id="cost-price" placeholder="0" oninput="calcPricing()">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">客户通过你获得的经济价值</label>
+        <div class="price-input-wrap">
+          <span class="price-prefix">¥</span>
+          <input type="number" id="client-value" placeholder="0" oninput="calcPricing()">
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:5px">例：帮客户年增收50万，则填500000</div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">你的报价价格（建议 = 客户获得价值的10-30%）</label>
+      <div class="price-input-wrap">
+        <span class="price-prefix" style="font-size:18px;color:var(--gold)">¥</span>
+        <input type="number" id="offer-price" placeholder="0" style="font-size:20px;font-weight:800;color:var(--gold);padding-left:34px" oninput="calcPricing()">
+      </div>
+    </div>
+
+    <div class="pricing-analysis" id="pricing-analysis" style="display:none">
+      <div class="pricing-stat">
+        <div class="stat-label">毛利率</div>
+        <div class="stat-val" id="stat-margin">-</div>
+      </div>
+      <div class="pricing-stat">
+        <div class="stat-label">占客户价值比</div>
+        <div class="stat-val" id="stat-ratio">-</div>
+      </div>
+      <div class="pricing-stat">
+        <div class="stat-label">定价评估</div>
+        <div class="stat-val" id="stat-verdict">-</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💳 付款方式</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <input type="checkbox" id="pay-full" checked style="width:16px;height:16px;margin-top:3px;accent-color:var(--gold);flex-shrink:0">
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:14px">一次性全款</div>
+          <input type="text" id="pay-full-desc" placeholder="例：¥9,800 一次付清（节省¥2,800）" style="margin-top:6px;font-size:13px">
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <input type="checkbox" id="pay-installment" style="width:16px;height:16px;margin-top:3px;accent-color:var(--gold);flex-shrink:0">
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:14px">分期付款</div>
+          <input type="text" id="pay-install-desc" placeholder="例：¥3,800 × 3期，共¥11,400" style="margin-top:6px;font-size:13px">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn-ghost" onclick="prevStep()">← 上一步</button>
+    <button class="btn-gold" onclick="nextStep()">下一步：奖励叠加 →</button>
+  </div>
+</div>
+
+
+<!-- ================================================================
+  STEP 7: 奖励叠加
+================================================================ -->
+<div class="step" id="step-7">
+  <div class="step-head">
+    <span class="step-icon">🎁</span>
+    <h2 class="step-title">奖励叠加</h2>
+    <p class="step-desc">让奖励的感知价值超越报价本身，使拒绝变成"不理性"</p>
+  </div>
+
+  <div class="insight-box">
+    <p>奖励的关键不是"多"，而是<strong>每一个都针对客户的具体顾虑或子问题</strong>。给每个奖励起一个能独立销售的好名字，并标注市场价值。奖励总价值建议超过报价价格的 2-3 倍。</p>
+  </div>
+
+  <div id="bonuses-list"></div>
+
+  <button class="btn-add" onclick="addBonus()">+ 添加奖励</button>
+  <button class="btn-ai" id="ai-btn-step7" onclick="aiSuggestBonuses()" style="width:100%;margin-top:10px">✨ AI 建议：自动生成3个高价值奖励方案</button>
+
+  <div class="bonus-total-bar" style="margin-top:16px">
+    <div>
+      <div class="label">奖励总价值</div>
+      <div class="value-multiple">价值倍数：<span id="value-multiple">-</span></div>
+    </div>
+    <div class="value" id="bonus-total-display">¥0</div>
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn-ghost" onclick="prevStep()">← 上一步</button>
+    <button class="btn-gold" onclick="nextStep()">下一步：保证设计 →</button>
+  </div>
+</div>
+
+
+<!-- ================================================================
+  STEP 8: 保证
+================================================================ -->
+<div class="step" id="step-8">
+  <div class="step-head">
+    <span class="step-icon">🛡️</span>
+    <h2 class="step-title">设计你的保证</h2>
+    <p class="step-desc">把风险从客户身上转移到你身上，消除购买顾虑</p>
+  </div>
+
+  <div class="insight-box">
+    <p>保证越强，转化率越高，但退款风险也越高。关键是：<strong>你对自己的结果有多少信心？</strong>如果你的方法真的有效，强保证反而会减少退款——因为认真的客户都会达到结果。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">选择保证类型</div>
+    <div class="guarantee-options">
+      <div class="guarantee-option" id="g-opt-unconditional" onclick="selectGuarantee('unconditional', this)">
+        <div class="g-header"><span class="g-icon">💯</span><span class="g-title">无条件退款保证</span></div>
+        <div class="g-desc">X天内不满意，全额退款，无需任何理由</div>
+        <div class="g-badge" style="color:var(--green)">✓ 最大化消除顾虑 · 适合建立新品牌时使用</div>
+      </div>
+      <div class="guarantee-option active" id="g-opt-conditional" onclick="selectGuarantee('conditional', this)">
+        <div class="g-header"><span class="g-icon">📋</span><span class="g-title">结果保证（有条件）</span></div>
+        <div class="g-desc">按照我们的方法执行，X天内未达到Y结果，全额退款</div>
+        <div class="g-badge" style="color:var(--gold)">⭐ 推荐 · 展示信心同时保护合理利益</div>
+      </div>
+      <div class="guarantee-option" id="g-opt-service" onclick="selectGuarantee('service', this)">
+        <div class="g-header"><span class="g-icon">♾️</span><span class="g-title">服务延续保证</span></div>
+        <div class="g-desc">没有达到结果，我们继续免费提供服务，直到你成功</div>
+        <div class="g-badge" style="color:var(--accent)">💪 极强信心展示 · 可能延长服务时长</div>
+      </div>
+      <div class="guarantee-option" id="g-opt-anti" onclick="selectGuarantee('anti', this)">
+        <div class="g-header"><span class="g-icon">🔥</span><span class="g-title">反向保证（高端品牌）</span></div>
+        <div class="g-desc">"我们不提供退款，因为真正认真的人根本不会想着退款"</div>
+        <div class="g-badge" style="color:var(--muted)">⚠ 需要强大品牌背书 · 用于筛选优质客户</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✍️ 定制你的保证文案</div>
+    <div class="field">
+      <label class="field-label">保证描述（用你自己的语言，越具体越有力）</label>
+      <textarea id="guarantee-text" rows="5" placeholder="例：如果你在90天内严格按照我们的饮食和运动计划执行，体重没有减少至少10斤，我们将100%退款，不问任何原因——你还可以保留所有的课程资料和工具包。我愿意承担全部风险，因为我对这套系统的效果有绝对信心。"></textarea>
+      <button class="btn-ai" id="ai-btn-step8" onclick="aiSuggestGuarantee()" style="width:100%;margin-top:8px">✨ AI 建议：生成强力保证文案</button>
+    </div>
+    <div class="field">
+      <label class="field-label">保证期限</label>
+      <div class="tag-group">
+        <span class="tag" onclick="selectTag(this,'gperiod')">30天</span>
+        <span class="tag active" onclick="selectTag(this,'gperiod')">60天</span>
+        <span class="tag" onclick="selectTag(this,'gperiod')">90天</span>
+        <span class="tag" onclick="selectTag(this,'gperiod')">180天</span>
+        <span class="tag" onclick="selectTag(this,'gperiod')">1年</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn-ghost" onclick="prevStep()">← 上一步</button>
+    <button class="btn-gold" onclick="nextStep()">下一步：稀缺与紧迫 →</button>
+  </div>
+</div>
+
+
+<!-- ================================================================
+  STEP 9: 稀缺性 & 紧迫感
+================================================================ -->
+<div class="step" id="step-9">
+  <div class="step-head">
+    <span class="step-icon">⏰</span>
+    <h2 class="step-title">稀缺性 & 紧迫感</h2>
+    <p class="step-desc">让客户现在就采取行动，而不是"等下次再说"</p>
+  </div>
+
+  <div class="insight-box" style="border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.05)">
+    <p><strong style="color:var(--red)">⚠️ 诚信原则：</strong>稀缺性和紧迫感必须是真实的。人为制造的假稀缺会破坏信任，损害长期品牌。只使用你实际能执行的限制条件。真实的稀缺比虚假的更有力量。</p>
+  </div>
+
+  <div class="sc-grid">
+    <div class="sc-card">
+      <div class="sc-title blue">🔒 稀缺性（数量限制）</div>
+      <div class="sc-option">
+        <div class="sc-option-header">
+          <input type="checkbox" id="sc-spots">
+          <span class="sc-option-label">限制名额</span>
+        </div>
+        <input type="text" id="sc-spots-text" placeholder="例：本期只招收15名学员">
+      </div>
+      <div class="sc-option">
+        <div class="sc-option-header">
+          <input type="checkbox" id="sc-energy">
+          <span class="sc-option-label">精力有限</span>
+        </div>
+        <input type="text" id="sc-energy-text" placeholder="例：我每月只能服务5个1对1客户">
+      </div>
+      <div class="sc-option">
+        <div class="sc-option-header">
+          <input type="checkbox" id="sc-cohort">
+          <span class="sc-option-label">限期开放</span>
+        </div>
+        <input type="text" id="sc-cohort-text" placeholder="例：下一期开放时间未定，错过需等待">
+      </div>
+    </div>
+    <div class="sc-card">
+      <div class="sc-title orange">⏱️ 紧迫感（时间限制）</div>
+      <div class="sc-option">
+        <div class="sc-option-header">
+          <input type="checkbox" id="ug-price">
+          <span class="sc-option-label">限时优惠价</span>
+        </div>
+        <input type="text" id="ug-price-text" placeholder="例：48小时内报名享早鸟价，后续涨价">
+      </div>
+      <div class="sc-option">
+        <div class="sc-option-header">
+          <input type="checkbox" id="ug-deadline">
+          <span class="sc-option-label">报名截止日期</span>
+        </div>
+        <input type="text" id="ug-deadline-text" placeholder="例：X月X日23:59截止，不再接受报名">
+      </div>
+      <div class="sc-option">
+        <div class="sc-option-header">
+          <input type="checkbox" id="ug-bonus">
+          <span class="sc-option-label">限时奖励</span>
+        </div>
+        <input type="text" id="ug-bonus-text" placeholder="例：今日报名额外获得1次价值X元的私人咨询">
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">✍️ 综合稀缺/紧迫说明</div>
+    <textarea id="scarcity-text" rows="4" placeholder="用一段完整的文字描述你的稀缺性和紧迫感...&#10;&#10;例：我们每期只接收20名学员，以确保每个人都能获得个性化关注。本期报名截止日期为X月X日，错过后下一期开放时间不确定（通常需要等待3-6个月）。今日报名还可额外获得价值1,980元的1对1启动诊断，名额仅剩3个。"></textarea>
+    <button class="btn-ai" id="ai-btn-step9" onclick="aiSuggestScarcity()" style="width:100%;margin-top:8px">✨ AI 建议：生成稀缺性与紧迫感文案</button>
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn-ghost" onclick="prevStep()">← 上一步</button>
+    <button class="btn-gold" onclick="nextStep()">下一步：命名报价 →</button>
+  </div>
+</div>
+
+
+<!-- ================================================================
+  STEP 10: 命名
+================================================================ -->
+<div class="step" id="step-10">
+  <div class="step-head">
+    <span class="step-icon">✨</span>
+    <h2 class="step-title">命名你的大满贯报价</h2>
+    <p class="step-desc">好名字让客户一听就想了解，甚至在你还没说话之前就开始渴望</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✨ MAGIC 命名公式</div>
+    <div class="magic-letters">
+      <div class="magic-letter">
+        <div class="ml-badge">M</div>
+        <div class="ml-name">Magnet 磁铁</div>
+        <div class="ml-desc">什么元素让人无法抗拒？（具体数字、独特方法名、强力承诺）</div>
+      </div>
+      <div class="magic-letter">
+        <div class="ml-badge">A</div>
+        <div class="ml-name">Avatar 人群</div>
+        <div class="ml-desc">精确描述这是给谁的</div>
+      </div>
+      <div class="magic-letter">
+        <div class="ml-badge">G</div>
+        <div class="ml-name">Goal 目标</div>
+        <div class="ml-desc">他们最渴望的具体结果</div>
+      </div>
+      <div class="magic-letter">
+        <div class="ml-badge">I</div>
+        <div class="ml-name">Interval 时限</div>
+        <div class="ml-desc">多快能实现（越短越好）</div>
+      </div>
+      <div class="magic-letter">
+        <div class="ml-badge">C</div>
+        <div class="ml-name">Container 形式</div>
+        <div class="ml-desc">训练营/系统/公式/方法论</div>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label">M - 吸引子（数字、独特词汇）</label>
+        <input type="text" id="name-m" placeholder="例：90天、5步、零基础、秘密" oninput="buildName()">
+      </div>
+      <div class="field">
+        <label class="field-label">A - 目标人群</label>
+        <input type="text" id="name-a" placeholder="例：宝妈、职场人、创业者" oninput="buildName()">
+      </div>
+      <div class="field">
+        <label class="field-label">G - 目标结果</label>
+        <input type="text" id="name-g" placeholder="例：减脂20斤、月入5万、找到伴侣" oninput="buildName()">
+      </div>
+      <div class="field">
+        <label class="field-label">I - 时间框架</label>
+        <input type="text" id="name-i" placeholder="例：90天、12周、30天" oninput="buildName()">
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">C - 载体形式</label>
+      <input type="text" id="name-c" placeholder="例：特训营、系统、方法论、蜕变计划" oninput="buildName()">
+    </div>
+
+    <div class="name-preview">
+      <div class="label">自动生成名称预览</div>
+      <div class="generated" id="name-generated">填写上方信息后自动生成</div>
+    </div>
+
+    <button class="btn-ai" id="ai-btn-step10" onclick="aiGenerateNames()" style="width:100%;margin-bottom:12px">✨ AI 生成器：批量生成5个 MAGIC 报价名称</button>
+    <div id="ai-names-container"></div>
+
+    <div class="field">
+      <label class="field-label">最终确认的报价名称（可手动修改）</label>
+      <input type="text" id="final-name" placeholder="你的大满贯报价名称" style="font-size:18px;font-weight:800">
+    </div>
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn-ghost" onclick="prevStep()">← 上一步</button>
+    <button class="btn-gold" style="font-size:16px;padding:14px 36px" onclick="buildFinalOffer()">🏆 生成大满贯报价</button>
+  </div>
+</div>
+
+
+<!-- ================================================================
+  FINAL: 大满贯报价
+================================================================ -->
+<div id="step-final">
+  <div class="step-head">
+    <span class="step-icon">🏆</span>
+    <h2 class="step-title gold-title" style="background:linear-gradient(135deg,var(--gold-dark),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">你的大满贯报价</h2>
+    <p class="step-desc">基于 Alex Hormozi《100M Offers》方法论生成</p>
+  </div>
+
+  <div class="offer-doc" id="offer-doc">
+    <div class="offer-doc-header">
+      <div class="offer-eyebrow">Grand Slam Offer · 大满贯报价</div>
+      <div class="offer-main-title" id="out-title">报价名称</div>
+      <div class="offer-tagline" id="out-tagline">专为 [目标客户] 设计</div>
+    </div>
+
+    <div class="offer-doc-body">
+
+      <div class="offer-section">
+        <div class="offer-section-title">🌟 你将获得的结果</div>
+        <div class="outcome-box" id="out-outcome"></div>
+      </div>
+
+      <div class="offer-section">
+        <div class="offer-section-title">📦 完整解决方案</div>
+        <div id="out-solutions"></div>
+      </div>
+
+      <div class="offer-section" id="out-bonuses-section">
+        <div class="offer-section-title">🎁 限时赠送奖励</div>
+        <div id="out-bonuses"></div>
+        <div style="margin-top:12px;background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.25);border-radius:var(--r);padding:14px;text-align:center">
+          <span style="color:var(--muted);font-size:13px">奖励总价值 </span>
+          <span style="font-size:22px;font-weight:800;color:var(--gold)" id="out-bonus-total">¥0</span>
+        </div>
+      </div>
+
+      <div class="offer-section">
+        <div class="offer-section-title">💎 总价值明细</div>
+        <div id="out-value-stack"></div>
+        <div class="value-total-row">
+          <span>总价值</span>
+          <span class="total-price" id="out-total-value">¥0</span>
+        </div>
+      </div>
+
+      <div class="price-hero">
+        <div class="ph-label">今日特别报价</div>
+        <div class="ph-price" id="out-price">¥0</div>
+        <div class="ph-payment" id="out-payment"></div>
+      </div>
+
+      <div class="offer-section">
+        <div class="offer-section-title">🛡️ 风险保证</div>
+        <div class="guarantee-block">
+          <div class="guarantee-block g-text" id="out-guarantee"></div>
+        </div>
+      </div>
+
+      <div class="offer-section" id="out-scarcity-section">
+        <div class="offer-section-title" style="color:var(--red)">⏰ 重要提醒</div>
+        <div class="scarcity-block">
+          <div class="s-text" id="out-scarcity"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="offer-footer">
+      大满贯报价制作系统 · 基于 Alex Hormozi《$100M Offers》方法论 · 2024
+    </div>
+  </div>
+
+  <div class="action-bar no-print">
+    <button class="btn-gold" onclick="window.print()">🖨️ 打印 / 保存PDF</button>
+    <button class="btn-ghost" onclick="copyOfferText()">📋 复制文案</button>
+    <button class="btn-ghost" onclick="location.reload()">🔄 重新制作</button>
+  </div>
+</div>
+
+</main>
+
+<!-- STEP DOTS -->
+<div class="dots-nav no-print" id="dots-nav"></div>
+
+<!-- AI Chat Widget -->
+<button class="chat-fab no-print" id="chat-fab" onclick="toggleChat()" title="AI 报价顾问">💬</button>
+<div class="chat-panel no-print" id="chat-panel">
+  <div class="chat-header">
+    <div>
+      <div class="chat-header-title">AI 报价顾问</div>
+      <div class="chat-header-sub">DeepSeek · Hormozi $100M Offers 专家</div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">×</button>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-msg ai">你好！我是你的 AI 报价顾问，专注于 Alex Hormozi 的《$100M Offers》方法论。有任何关于定价策略、价值堆叠、保证设计或报价命名的问题，尽管问我！</div>
+  </div>
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="问任何关于报价设计的问题..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}">
+    <button class="chat-send-btn" id="chat-send-btn" onclick="sendChatMessage()">↑</button>
+  </div>
+</div>
+
+<!-- AI Quick Generate Modal -->
+<div class="ai-modal-overlay no-print" id="quick-gen-modal" onclick="if(event.target===this)closeQuickGenModal()">
+  <div class="ai-modal">
+    <div class="ai-modal-title">⚡ AI 一键生成报价</div>
+    <div class="ai-modal-desc">只需填写行业和目标客户，AI 将自动填写全部 10 个步骤，生成完整的大满贯报价框架（约 30 秒）。</div>
+    <div class="field">
+      <label class="field-label">你的行业 / 服务类型</label>
+      <input type="text" id="qg-industry" placeholder="例：健身教练、企业管理咨询、少儿英语培训、电商运营">
+    </div>
+    <div class="field">
+      <label class="field-label">目标客户描述</label>
+      <input type="text" id="qg-target" placeholder="例：30-45岁想产后瘦身的职场宝妈">
+    </div>
+    <div class="field">
+      <label class="field-label">期望报价价格（选填，留空由 AI 建议）</label>
+      <div class="price-input-wrap">
+        <span class="price-prefix">¥</span>
+        <input type="number" id="qg-price" placeholder="例：9800">
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+      <button class="btn-ai" id="qg-btn" onclick="aiQuickGenerate()" style="flex:1;min-width:180px">⚡ 立即生成完整报价</button>
+      <button class="btn-ghost" onclick="closeQuickGenModal()" style="padding:10px 20px">取消</button>
+    </div>
+    <div id="qg-status" style="margin-top:16px;font-size:13px;color:var(--muted);text-align:center;display:none;line-height:1.6"></div>
+  </div>
+</div>
+
+
+<script>
+// =====================================================================
+// STATE
+// =====================================================================
+let currentStep = 1;
+const TOTAL = 10;
+let problems = [];
+let extraSolutions = [];
+let bonuses = [];
+let selectedGuarantee = 'conditional';
+let selectedMarket = 'health';
+
+// =====================================================================
+// NAVIGATION
+// =====================================================================
+function showStep(n) {
+  // Hide current
+  const curEl = document.getElementById(currentStep <= TOTAL ? `step-${currentStep}` : 'step-final');
+  if (curEl) curEl.className = 'step';
+
+  currentStep = n;
+
+  const nextEl = document.getElementById(n <= TOTAL ? `step-${n}` : 'step-final');
+  if (nextEl) nextEl.className = n <= TOTAL ? 'step active' : 'step-final active';
+
+  // Progress
+  const pct = n <= TOTAL ? (n / TOTAL * 100) : 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  const curStepEl = document.getElementById('cur-step');
+  if (curStepEl) curStepEl.textContent = n <= TOTAL ? n : TOTAL;
+
+  updateDots();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Special inits
+  if (n === 5) initSolutionsStep();
+  if (n === 7) { initBonusesStep(); }
+}
+
+function nextStep() { showStep(currentStep + 1); }
+function prevStep() { if (currentStep > 1) showStep(currentStep - 1); }
+
+// =====================================================================
+// DOTS
+// =====================================================================
+function updateDots() {
+  const nav = document.getElementById('dots-nav');
+  nav.innerHTML = Array.from({length: TOTAL}, (_, i) => {
+    const s = i + 1;
+    const cls = s === currentStep ? 'dot active' : s < currentStep ? 'dot done' : 'dot';
+    return `<div class="${cls}" onclick="showStep(${s})" title="第${s}步"></div>`;
+  }).join('');
+}
+updateDots();
+
+// =====================================================================
+// STEP 1: MARKET
+// =====================================================================
+function selectMarket(el, market) {
+  document.querySelectorAll('.market-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  selectedMarket = market;
+}
+
+// =====================================================================
+// TAG SELECTION
+// =====================================================================
+function selectTag(el, group) {
+  el.closest('.tag-group').querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// =====================================================================
+// STEP 3: VALUE EQUATION
+// =====================================================================
+function calcValue() {
+  const d = +document.getElementById('sl-dream').value;
+  const p = +document.getElementById('sl-prob').value;
+  const t = +document.getElementById('sl-time').value;
+  const e = +document.getElementById('sl-effort').value;
+
+  document.getElementById('v-dream').textContent = d;
+  document.getElementById('v-prob').textContent = p;
+  document.getElementById('v-time').textContent = t;
+  document.getElementById('v-effort').textContent = e;
+
+  // Score: numerator / denominator, scaled to 0-10
+  const raw = (d * p) / (t * e);
+  const score = Math.min(10, (raw * 2.5)).toFixed(1);
+
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('score-bar').style.width = (score / 10 * 100) + '%';
+
+  const labelEl = document.getElementById('score-label');
+  if (score >= 8) { labelEl.textContent = '🏆 大满贯级别！'; labelEl.style.color = 'var(--gold)'; }
+  else if (score >= 6) { labelEl.textContent = '👍 良好，仍有提升空间'; labelEl.style.color = '#60A5FA'; }
+  else if (score >= 4) { labelEl.textContent = '⚠️ 一般，需要改进'; labelEl.style.color = 'var(--orange)'; }
+  else { labelEl.textContent = '❌ 感知价值过低'; labelEl.style.color = 'var(--red)'; }
+}
+calcValue();
+
+// =====================================================================
+// STEP 4: PROBLEMS
+// =====================================================================
+function addProblem() {
+  const input = document.getElementById('problem-input');
+  const text = input.value.trim();
+  if (!text) return;
+  problems.push({ id: Date.now(), text });
+  input.value = '';
+  renderProblems();
+}
+
+function quickAdd(text) {
+  problems.push({ id: Date.now(), text });
+  renderProblems();
+}
+
+function removeProblem(id) {
+  problems = problems.filter(p => p.id !== id);
+  renderProblems();
+}
+
+function renderProblems() {
+  const list = document.getElementById('problems-list');
+  document.getElementById('problem-count').textContent = problems.length;
+  if (problems.length === 0) {
+    list.innerHTML = '<div class="empty-state">还没有添加障碍，建议至少添加 8 个</div>';
+    return;
+  }
+  list.innerHTML = problems.map((p, i) => `
+    <div class="problem-item">
+      <span class="problem-num">${i + 1}</span>
+      <span class="problem-text">${p.text}</span>
+      <button class="btn-danger" onclick="removeProblem(${p.id})">移除</button>
+    </div>
+  `).join('');
+}
+
+// =====================================================================
+// STEP 5: SOLUTIONS
+// =====================================================================
+function initSolutionsStep() {
+  const container = document.getElementById('solutions-container');
+  if (problems.length === 0) {
+    container.innerHTML = '<div class="card"><div class="empty-state">请先在步骤4添加障碍</div></div>';
+    return;
+  }
+  container.innerHTML = problems.map((p, i) => `
+    <div class="solution-item">
+      <div class="solution-problem-ref">障碍 ${i+1}：${p.text}</div>
+      <div class="solution-fields">
+        <input type="text" id="sol-${p.id}" placeholder="针对此障碍的解决方案...">
+        <select id="sol-type-${p.id}" class="delivery-type">
+          <option value="video">📹 录播视频</option>
+          <option value="coaching">📞 1对1辅导</option>
+          <option value="template">📋 模板工具</option>
+          <option value="community">👥 社群支持</option>
+          <option value="live">🎥 直播课程</option>
+          <option value="automation">🤖 自动化系统</option>
+          <option value="ebook">📖 电子手册</option>
+          <option value="app">📱 APP/软件</option>
+          <option value="other">💡 其他</option>
+        </select>
+      </div>
+    </div>
+  `).join('');
+
+  // Apply AI-generated solutions if available
+  if (window._aiGeneratedSolutions && window._aiGeneratedSolutions.length > 0) {
+    problems.forEach((p, i) => {
+      const el = document.getElementById(`sol-${p.id}`);
+      if (el && window._aiGeneratedSolutions[i]) el.value = window._aiGeneratedSolutions[i];
+    });
+    window._aiGeneratedSolutions = null;
+  }
+}
+
+function addExtraSolution() {
+  const input = document.getElementById('extra-sol-input');
+  const text = input.value.trim();
+  if (!text) return;
+  extraSolutions.push({ id: Date.now(), text });
+  input.value = '';
+  renderExtraSolutions();
+}
+
+function removeExtraSolution(id) {
+  extraSolutions = extraSolutions.filter(s => s.id !== id);
+  renderExtraSolutions();
+}
+
+function renderExtraSolutions() {
+  const list = document.getElementById('extra-solutions-list');
+  list.innerHTML = extraSolutions.map(s => `
+    <div class="problem-item" style="margin-top:8px">
+      <span class="problem-text">${s.text}</span>
+      <button class="btn-danger" onclick="removeExtraSolution(${s.id})">移除</button>
+    </div>
+  `).join('');
+}
+
+// =====================================================================
+// STEP 6: PRICING
+// =====================================================================
+function calcPricing() {
+  const cost = parseFloat(document.getElementById('cost-price').value) || 0;
+  const cv = parseFloat(document.getElementById('client-value').value) || 0;
+  const price = parseFloat(document.getElementById('offer-price').value) || 0;
+
+  const panel = document.getElementById('pricing-analysis');
+  if (price <= 0) { panel.style.display = 'none'; return; }
+  panel.style.display = 'grid';
+
+  // Margin
+  const margin = cost > 0 ? ((price - cost) / price * 100).toFixed(0) + '%' : '-';
+  document.getElementById('stat-margin').textContent = margin;
+
+  // Value ratio
+  if (cv > 0) {
+    const ratio = (price / cv * 100).toFixed(0) + '%';
+    document.getElementById('stat-ratio').textContent = ratio;
+  } else {
+    document.getElementById('stat-ratio').textContent = '-';
+  }
+
+  // Verdict
+  const vEl = document.getElementById('stat-verdict');
+  if (cv > 0) {
+    const r = price / cv;
+    if (r <= 0.15) { vEl.textContent = '🚀 极优'; vEl.style.color = 'var(--green)'; }
+    else if (r <= 0.30) { vEl.textContent = '✅ 优秀'; vEl.style.color = 'var(--green)'; }
+    else if (r <= 0.50) { vEl.textContent = '👍 良好'; vEl.style.color = '#60A5FA'; }
+    else { vEl.textContent = '⚠️ 偏高'; vEl.style.color = 'var(--orange)'; }
+  } else {
+    vEl.textContent = '-'; vEl.style.color = 'var(--muted)';
+  }
+}
+
+// =====================================================================
+// STEP 7: BONUSES
+// =====================================================================
+function initBonusesStep() {
+  if (bonuses.length === 0) addBonus();
+  else renderBonuses();
+  updateBonusTotal();
+}
+
+function addBonus() {
+  bonuses.push({ id: Date.now(), name: '', value: 0, desc: '' });
+  renderBonuses();
+  updateBonusTotal();
+}
+
+function removeBonus(id) {
+  bonuses = bonuses.filter(b => b.id !== id);
+  renderBonuses();
+  updateBonusTotal();
+}
+
+function renderBonuses() {
+  const container = document.getElementById('bonuses-list');
+  container.innerHTML = bonuses.map((b, i) => `
+    <div class="bonus-item">
+      <div class="bonus-header">
+        <span class="bonus-badge">🎁 奖励 ${i + 1}</span>
+        <button class="btn-danger" onclick="removeBonus(${b.id})">删除</button>
+      </div>
+      <div class="bonus-fields">
+        <div>
+          <label class="field-label">奖励名称</label>
+          <input type="text" value="${b.name}" placeholder="例：《零基础7天快速启动手册》" onchange="updateBonus(${b.id},'name',this.value)">
+        </div>
+        <div class="bonus-value-input">
+          <label class="field-label">市场价值 (¥)</label>
+          <div class="price-input-wrap">
+            <span class="price-prefix">¥</span>
+            <input type="number" value="${b.value || ''}" placeholder="0" oninput="updateBonus(${b.id},'value',+this.value);updateBonusTotal()">
+          </div>
+        </div>
+      </div>
+      <div>
+        <label class="field-label">奖励说明（解决什么子问题）</label>
+        <input type="text" value="${b.desc}" placeholder="例：帮助你在开始前建立正确的基础认知，避免最常见的3个错误" onchange="updateBonus(${b.id},'desc',this.value)">
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateBonus(id, field, value) {
+  const b = bonuses.find(b => b.id === id);
+  if (b) b[field] = value;
+}
+
+function updateBonusTotal() {
+  const total = bonuses.reduce((s, b) => s + (parseFloat(b.value) || 0), 0);
+  document.getElementById('bonus-total-display').textContent = '¥' + total.toLocaleString();
+
+  const price = parseFloat(document.getElementById('offer-price').value) || 0;
+  const multEl = document.getElementById('value-multiple');
+  if (price > 0 && total > 0) {
+    const m = (total / price).toFixed(1);
+    multEl.innerHTML = `<span style="color:${+m>=3?'var(--green)':+m>=2?'#60A5FA':'var(--orange)'}">${m}x</span>`;
+  } else {
+    multEl.innerHTML = '<span>-</span>';
+  }
+}
+
+// =====================================================================
+// STEP 8: GUARANTEE
+// =====================================================================
+function selectGuarantee(type, el) {
+  document.querySelectorAll('.guarantee-option').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  selectedGuarantee = type;
+}
+
+// =====================================================================
+// STEP 10: NAMING
+// =====================================================================
+function buildName() {
+  const m = document.getElementById('name-m').value.trim();
+  const a = document.getElementById('name-a').value.trim();
+  const g = document.getElementById('name-g').value.trim();
+  const iv = document.getElementById('name-i').value.trim();
+  const c = document.getElementById('name-c').value.trim();
+
+  let name = '';
+  if (iv && a && g) name = `${iv}${a}${g}${c ? '·' + c : ''}`;
+  else if (a && g) name = `${a}${g}${c || '系统'}`;
+  else if (g) name = `${g}${c || '训练营'}`;
+  if (m && name) name = `${m}：${name}`;
+  else if (m) name = m;
+
+  const genEl = document.getElementById('name-generated');
+  genEl.textContent = name || '填写上方信息后自动生成';
+
+  // Auto-fill final name if empty
+  const finalEl = document.getElementById('final-name');
+  if (!finalEl.dataset.manuallyEdited) finalEl.value = name;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const finalName = document.getElementById('final-name');
+  if (finalName) {
+    finalName.addEventListener('input', () => { finalName.dataset.manuallyEdited = '1'; });
+  }
+});
+
+// =====================================================================
+// BUILD FINAL OFFER
+// =====================================================================
+function buildFinalOffer() {
+  // Collect all data
+  const offerName = document.getElementById('final-name').value ||
+    document.getElementById('name-generated').textContent || '我的大满贯报价';
+  const niche = document.getElementById('niche').value;
+  const avatar = document.getElementById('avatar').value;
+  const primaryGoal = document.getElementById('primary-goal').value;
+  const transformation = document.getElementById('transformation').value;
+  const price = parseFloat(document.getElementById('offer-price').value) || 0;
+  const guaranteeText = document.getElementById('guarantee-text').value;
+  const scarcityText = document.getElementById('scarcity-text').value;
+
+  // --- Populate document ---
+  document.getElementById('out-title').textContent = offerName;
+  document.getElementById('out-tagline').textContent =
+    niche ? `专为 ${niche.slice(0,40)} 设计` : '你的专属解决方案';
+
+  // Outcome
+  const outcomeEl = document.getElementById('out-outcome');
+  outcomeEl.innerHTML = '';
+  if (primaryGoal) {
+    const p1 = document.createElement('p');
+    p1.innerHTML = `<strong>核心承诺：</strong>${primaryGoal}`;
+    outcomeEl.appendChild(p1);
+  }
+  if (transformation) {
+    const p2 = document.createElement('p');
+    p2.style.marginTop = '8px';
+    p2.textContent = transformation.replace(/\n/g, ' ');
+    outcomeEl.appendChild(p2);
+  }
+  if (!primaryGoal && !transformation) {
+    outcomeEl.textContent = '（请在步骤2填写梦想结果）';
+  }
+
+  // Solutions
+  const solContainer = document.getElementById('out-solutions');
+  solContainer.innerHTML = '';
+  let solCount = 0;
+
+  problems.forEach((p) => {
+    const solEl = document.getElementById(`sol-${p.id}`);
+    const solText = solEl ? solEl.value.trim() : '';
+    if (solText) {
+      solCount++;
+      const row = document.createElement('div');
+      row.className = 'solution-row';
+      row.innerHTML = `
+        <div class="solution-num">${solCount}</div>
+        <div class="solution-content">
+          <div class="s-name">${solText}</div>
+          <div class="s-prob">解决：${p.text}</div>
+        </div>`;
+      solContainer.appendChild(row);
+    }
+  });
+
+  extraSolutions.forEach(s => {
+    solCount++;
+    const row = document.createElement('div');
+    row.className = 'solution-row';
+    row.innerHTML = `
+      <div class="solution-num">${solCount}</div>
+      <div class="solution-content"><div class="s-name">${s.text}</div></div>`;
+    solContainer.appendChild(row);
+  });
+
+  if (solCount === 0) {
+    solContainer.innerHTML = '<div style="color:var(--muted);font-size:14px">（请在步骤5填写解决方案）</div>';
+  }
+
+  // Bonuses
+  const validBonuses = bonuses.filter(b => b.name);
+  const bonusTotal = bonuses.reduce((s, b) => s + (parseFloat(b.value) || 0), 0);
+
+  const bonusSection = document.getElementById('out-bonuses-section');
+  if (validBonuses.length === 0) {
+    bonusSection.style.display = 'none';
+  } else {
+    bonusSection.style.display = 'block';
+    document.getElementById('out-bonuses').innerHTML = validBonuses.map(b => `
+      <div class="bonus-row">
+        <div class="bonus-left">
+          <span class="bonus-tag-icon">🎁</span>
+          <div class="bonus-info">
+            <div class="b-name">${b.name}</div>
+            ${b.desc ? `<div class="b-desc">${b.desc}</div>` : ''}
+          </div>
+        </div>
+        <div class="bonus-price">¥${(parseFloat(b.value)||0).toLocaleString()}</div>
+      </div>
+    `).join('');
+    document.getElementById('out-bonus-total').textContent = '¥' + bonusTotal.toLocaleString();
+  }
+
+  // Value stack
+  const solValue = price > 0 ? price * 1.5 : 0;
+  const totalValue = solValue + bonusTotal;
+  const stackEl = document.getElementById('out-value-stack');
+  stackEl.innerHTML = `
+    <div class="value-stack-row">
+      <span class="item-name">核心解决方案</span>
+      <span class="item-price">¥${solValue.toLocaleString()}</span>
+    </div>
+    ${validBonuses.map(b => `
+    <div class="value-stack-row">
+      <span class="item-name">${b.name}</span>
+      <span class="item-price">¥${(parseFloat(b.value)||0).toLocaleString()}</span>
+    </div>`).join('')}
+  `;
+  document.getElementById('out-total-value').textContent = '¥' + totalValue.toLocaleString();
+
+  // Price
+  document.getElementById('out-price').textContent = price > 0 ? '¥' + price.toLocaleString() : '（未填写）';
+  const payParts = [];
+  if (document.getElementById('pay-full').checked) {
+    payParts.push(document.getElementById('pay-full-desc').value || `¥${price.toLocaleString()} 一次付清`);
+  }
+  if (document.getElementById('pay-installment').checked) {
+    payParts.push(document.getElementById('pay-install-desc').value || '分期付款可选');
+  }
+  document.getElementById('out-payment').textContent = payParts.join('  |  ');
+
+  // Guarantee
+  document.getElementById('out-guarantee').textContent =
+    guaranteeText || '（请在步骤8填写保证内容）';
+
+  // Scarcity
+  const scSection = document.getElementById('out-scarcity-section');
+  if (scarcityText) {
+    scSection.style.display = 'block';
+    document.getElementById('out-scarcity').textContent = scarcityText;
+  } else {
+    scSection.style.display = 'none';
+  }
+
+  // Show final
+  const curEl = document.getElementById(`step-${currentStep}`);
+  if (curEl) curEl.className = 'step';
+  currentStep = TOTAL + 1;
+  document.getElementById('step-final').className = 'step-final active';
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('cur-step').textContent = TOTAL;
+  updateDots();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// =====================================================================
+// DEEPSEEK AI INTEGRATION
+// =====================================================================
+const DEEPSEEK_API_KEY = 'sk-69d6233109684b43b90985bfe695fc8c';
+
+async function callDeepSeek(messages, { stream = false, onChunk } = {}) {
+  const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+    },
+    body: JSON.stringify({ model: 'deepseek-chat', messages, max_tokens: 2000, stream })
+  });
+  if (!response.ok) {
+    let msg = `HTTP ${response.status}`;
+    try { const e = await response.json(); msg = e.error?.message || msg; } catch(_) {}
+    throw new Error(msg);
+  }
+  if (stream && onChunk) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let full = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      for (const line of decoder.decode(value).split('\n')) {
+        if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+          try {
+            const delta = JSON.parse(line.slice(6)).choices[0]?.delta?.content || '';
+            if (delta) { full += delta; onChunk(full); }
+          } catch(_) {}
+        }
+      }
+    }
+    return full;
+  }
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+function getOfferContext() {
+  return {
+    market: selectedMarket,
+    niche: document.getElementById('niche')?.value || '',
+    avatar: document.getElementById('avatar')?.value || '',
+    primaryGoal: document.getElementById('primary-goal')?.value || '',
+    problems: problems.map(p => p.text).join('、'),
+    price: document.getElementById('offer-price')?.value || ''
+  };
+}
+
+function setAiBtn(id, loading) {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) {
+    btn.dataset.origHtml = btn.innerHTML;
+    btn.innerHTML = '<span class="ai-spinner"></span> AI 思考中...';
+  } else if (btn.dataset.origHtml) {
+    btn.innerHTML = btn.dataset.origHtml;
+  }
+}
+
+// ---- Step 2: Dream Outcome ----
+let _lastStep2Result = '';
+async function aiSuggestStep2() {
+  const ctx = getOfferContext();
+  if (!ctx.niche && !ctx.avatar) { alert('请先在步骤1填写你的利基市场和客户画像'); return; }
+  setAiBtn('ai-btn-step2', true);
+  const box = document.getElementById('ai-result-step2');
+  box.style.display = 'block';
+  box.innerHTML = '<div class="ai-result-header">✨ AI 正在生成建议...</div>';
+  try {
+    const msgs = [
+      { role: 'system', content: 'You are an expert in Alex Hormozi\'s $100M Offers. Respond in Chinese, concise and powerful.' },
+      { role: 'user', content: `根据以下信息，帮我填写大满贯报价的梦想结果模块：\n市场：${ctx.market==='health'?'健康':ctx.market==='wealth'?'财富':'关系'}\n利基：${ctx.niche}\n客户画像：${ctx.avatar}\n\n请严格按以下格式输出（不要多余的话）：\n主要结果：[具体可量化的核心承诺，30字以内]\n之前状态：[客户现在的痛苦状态，2句话]\n之后状态：[达成目标后的美好状态，2句话]\n时间框架：[建议的时间框架]\n次要收益：[3-5个次要收益，逗号分隔]` }
+    ];
+    const result = await callDeepSeek(msgs, { stream: true, onChunk: (t) => {
+      box.innerHTML = `<div class="ai-result-header">✨ AI 建议（实时生成中）</div><div style="color:var(--text)">${t}</div>`;
+    }});
+    _lastStep2Result = result;
+    box.innerHTML = `<div class="ai-result-header">✨ AI 建议已生成</div><div style="color:var(--text);margin-bottom:10px">${result}</div>
+      <button class="btn-ai" onclick="applyStep2Suggestions()" style="width:100%;font-size:13px">✅ 应用此建议到表单</button>`;
+  } catch(e) {
+    box.innerHTML = `<div class="ai-result-header" style="color:var(--red)">❌ 生成失败：${e.message}</div>`;
+  } finally { setAiBtn('ai-btn-step2', false); }
+}
+
+function applyStep2Suggestions() {
+  const lines = _lastStep2Result.split('\n').map(l => l.trim()).filter(Boolean);
+  const get = (prefix) => lines.find(l => l.startsWith(prefix))?.slice(prefix.length).trim() || '';
+  const goal = get('主要结果：');
+  const before = get('之前状态：');
+  const after = get('之后状态：');
+  const tf = get('时间框架：');
+  const secondary = get('次要收益：');
+  if (goal) document.getElementById('primary-goal').value = goal;
+  if (secondary) document.getElementById('secondary-goals').value = secondary;
+  if (before || after) document.getElementById('transformation').value = `【之前】${before}\n\n【之后】${after}`;
+  if (tf) document.getElementById('timeframe-custom').value = tf;
+  alert('✅ 已应用 AI 建议到表单！');
+}
+
+// ---- Step 4: Obstacles ----
+async function aiSuggestObstacles() {
+  const ctx = getOfferContext();
+  if (!ctx.niche && !ctx.avatar) { alert('请先在步骤1填写你的利基市场'); return; }
+  setAiBtn('ai-btn-step4', true);
+  try {
+    const msgs = [
+      { role: 'system', content: 'You are an expert in Alex Hormozi\'s $100M Offers. Respond in Chinese.' },
+      { role: 'user', content: `针对以下利基，列出客户在追求目标时最常遇到的10个障碍（外部、内部、实际各至少2个）：\n利基：${ctx.niche}\n客户画像：${ctx.avatar}\n梦想结果：${ctx.primaryGoal}\n\n每个障碍单独一行，不要编号，不要多余说明，每条15字以内：` }
+    ];
+    const result = await callDeepSeek(msgs);
+    const list = result.split('\n').map(l => l.replace(/^[\d\-\.、\*]+\s*/, '').trim()).filter(l => l && l.length > 2 && l.length < 60);
+    if (!list.length) throw new Error('未能解析障碍列表');
+    if (confirm(`AI 为你生成了 ${list.length} 个障碍：\n\n${list.join('\n')}\n\n点击确定将追加到现有列表`)) {
+      list.forEach(text => problems.push({ id: Date.now() + Math.random(), text }));
+      renderProblems();
+    }
+  } catch(e) { alert('AI 建议生成失败：' + e.message); }
+  finally { setAiBtn('ai-btn-step4', false); }
+}
+
+// ---- Step 7: Bonuses ----
+async function aiSuggestBonuses() {
+  const ctx = getOfferContext();
+  setAiBtn('ai-btn-step7', true);
+  try {
+    const msgs = [
+      { role: 'system', content: 'You are an expert in Alex Hormozi\'s $100M Offers. Respond in Chinese.' },
+      { role: 'user', content: `为以下报价设计3个高价值赠品/奖励方案：\n利基：${ctx.niche||'专业服务'}\n核心障碍：${ctx.problems||'未知'}\n报价价格：${ctx.price?'¥'+ctx.price:'待定'}\n\n每个奖励格式如下（严格按此格式）：\n奖励1名称：...\n奖励1价值：...(纯数字)\n奖励1说明：...(20字以内)\n奖励2名称：...\n奖励2价值：...\n奖励2说明：...\n奖励3名称：...\n奖励3价值：...\n奖励3说明：...` }
+    ];
+    const result = await callDeepSeek(msgs);
+    const lines = result.split('\n').map(l => l.trim()).filter(Boolean);
+    const newBonuses = [];
+    let cur = null;
+    for (const line of lines) {
+      if (/奖励\d名称：/.test(line)) { if (cur?.name) newBonuses.push(cur); cur = { id: Date.now()+Math.random(), name: line.split('：').slice(1).join('：').trim(), value: 0, desc: '' }; }
+      else if (/奖励\d价值：/.test(line) && cur) { cur.value = parseFloat(line.split('：').slice(1).join('：')) || 0; }
+      else if (/奖励\d说明：/.test(line) && cur) { cur.desc = line.split('：').slice(1).join('：').trim(); }
+    }
+    if (cur?.name) newBonuses.push(cur);
+    if (!newBonuses.length) throw new Error('未能解析奖励方案');
+    newBonuses.forEach(b => bonuses.push(b));
+    renderBonuses(); updateBonusTotal();
+    alert(`✅ 已添加 ${newBonuses.length} 个 AI 生成的奖励方案！`);
+  } catch(e) { alert('AI 建议生成失败：' + e.message); }
+  finally { setAiBtn('ai-btn-step7', false); }
+}
+
+// ---- Step 8: Guarantee ----
+async function aiSuggestGuarantee() {
+  const ctx = getOfferContext();
+  setAiBtn('ai-btn-step8', true);
+  try {
+    const typeMap = { unconditional:'无条件退款保证', conditional:'结果保证（有条件）', service:'服务延续保证', anti:'反向保证' };
+    const msgs = [
+      { role: 'system', content: 'You are an expert copywriter for Alex Hormozi\'s $100M Offers. Write in Chinese.' },
+      { role: 'user', content: `为以下报价撰写一段有力的保证文案：\n保证类型：${typeMap[selectedGuarantee]||'结果保证'}\n利基：${ctx.niche||'专业服务'}\n梦想结果：${ctx.primaryGoal||'达成目标'}\n报价价格：${ctx.price?'¥'+ctx.price:'不定'}\n\n要求：120字左右，包含具体条件和时限，语气自信真诚，直接输出文案不要标题。` }
+    ];
+    const result = await callDeepSeek(msgs);
+    document.getElementById('guarantee-text').value = result.trim();
+    alert('✅ 保证文案已填入！');
+  } catch(e) { alert('AI 建议生成失败：' + e.message); }
+  finally { setAiBtn('ai-btn-step8', false); }
+}
+
+// ---- Step 9: Scarcity ----
+async function aiSuggestScarcity() {
+  const ctx = getOfferContext();
+  setAiBtn('ai-btn-step9', true);
+  try {
+    const msgs = [
+      { role: 'system', content: 'You are an expert copywriter for Alex Hormozi\'s $100M Offers. Write in Chinese.' },
+      { role: 'user', content: `为以下报价撰写稀缺性和紧迫感说明：\n利基：${ctx.niche||'专业服务'}\n\n要求：100字左右，必须真实可执行，包含具体数字（名额/时间限制），语气诚恳不夸张，直接输出文案。` }
+    ];
+    const result = await callDeepSeek(msgs);
+    document.getElementById('scarcity-text').value = result.trim();
+    alert('✅ 稀缺说明文案已填入！');
+  } catch(e) { alert('AI 建议生成失败：' + e.message); }
+  finally { setAiBtn('ai-btn-step9', false); }
+}
+
+// ---- Step 10: Name Generator ----
+async function aiGenerateNames() {
+  const ctx = getOfferContext();
+  setAiBtn('ai-btn-step10', true);
+  const container = document.getElementById('ai-names-container');
+  container.innerHTML = '<div style="text-align:center;color:var(--muted);padding:16px;font-size:13px">⏳ AI 正在生成名称方案...</div>';
+  try {
+    const a = document.getElementById('name-a').value.trim();
+    const g = document.getElementById('name-g').value.trim();
+    const iv = document.getElementById('name-i').value.trim();
+    const c = document.getElementById('name-c').value.trim();
+    const msgs = [
+      { role: 'system', content: 'You are an expert in Alex Hormozi\'s MAGIC offer naming. Generate compelling Chinese names.' },
+      { role: 'user', content: `用 MAGIC 命名框架生成5个不同风格的报价名称：\n利基：${ctx.niche||'专业服务'}\n目标人群：${a||ctx.avatar?.slice(0,20)||'目标客户'}\n核心结果：${g||ctx.primaryGoal||'达成目标'}\n时间框架：${iv||'90天'}\n载体形式：${c||'训练营'}\n\n要求：每个名称独占一行，风格各异（数字型/情感型/承诺型/方法型/结果型），8-20字，直接输出5个名称，不要编号和多余说明。` }
+    ];
+    const result = await callDeepSeek(msgs);
+    const names = result.split('\n').map(l => l.replace(/^[\d\-\.、\*]+\s*/, '').trim()).filter(l => l && l.length > 3 && l.length < 50);
+    if (!names.length) throw new Error('未能解析名称');
+    container.innerHTML = `<div class="card" style="margin-bottom:16px">
+      <div class="card-title" style="margin-bottom:12px">✨ AI 生成的5个名称方案（点击选择）</div>
+      <div class="ai-names-grid">${names.map(n => `<div class="ai-name-option" onclick="selectAiName(this,'${n.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">${n}</div>`).join('')}</div>
+    </div>`;
+  } catch(e) {
+    container.innerHTML = `<div style="color:var(--red);font-size:13px;padding:8px">❌ 生成失败：${e.message}</div>`;
+  } finally { setAiBtn('ai-btn-step10', false); }
+}
+
+function selectAiName(el, name) {
+  document.querySelectorAll('.ai-name-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('final-name').value = name;
+  document.getElementById('final-name').dataset.manuallyEdited = '1';
+  document.getElementById('name-generated').textContent = name;
+}
+
+// ---- Quick Generate (One-click) ----
+function openQuickGenModal() { document.getElementById('quick-gen-modal').classList.add('open'); }
+function closeQuickGenModal() { document.getElementById('quick-gen-modal').classList.remove('open'); }
+
+async function aiQuickGenerate() {
+  const industry = document.getElementById('qg-industry').value.trim();
+  const target = document.getElementById('qg-target').value.trim();
+  if (!industry || !target) { alert('请填写行业/服务和目标客户'); return; }
+  const priceInput = document.getElementById('qg-price').value.trim();
+  const btn = document.getElementById('qg-btn');
+  const status = document.getElementById('qg-status');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ai-spinner"></span> AI 生成中（约30秒）...';
+  status.style.display = 'block';
+  status.textContent = '⏳ AI 正在生成完整报价框架，请稍候...';
+  try {
+    const suggestedPrice = priceInput ? parseInt(priceInput.replace(/[^\d]/g,'')) : 9800;
+    const msgs = [
+      { role: 'system', content: 'You are an expert in Alex Hormozi\'s $100M Offers. Generate complete offer frameworks as valid JSON in Chinese.' },
+      { role: 'user', content: `为以下业务生成完整的大满贯报价框架，以合法JSON格式输出，所有字符串值中不要有换行符：\n行业/服务：${industry}\n目标客户：${target}\n${priceInput?'期望价格：¥'+suggestedPrice:''}\n\n严格按此JSON格式输出：\n{"niche":"利基描述30字","avatar":"客户画像50字","primaryGoal":"核心结果承诺30字","transformBefore":"之前痛苦30字","transformAfter":"之后状态30字","problems":["障碍1","障碍2","障碍3","障碍4","障碍5","障碍6","障碍7","障碍8"],"solutions":["方案1","方案2","方案3","方案4","方案5","方案6","方案7","方案8"],"price":${suggestedPrice},"clientValue":${suggestedPrice*5},"bonuses":[{"name":"奖励名称1","value":1980,"desc":"功能说明1"},{"name":"奖励名称2","value":1280,"desc":"功能说明2"},{"name":"奖励名称3","value":980,"desc":"功能说明3"}],"guaranteeText":"保证文案80字","scarcityText":"稀缺说明60字","offerName":"报价名称8-15字"}` }
+    ];
+    status.textContent = '⏳ AI 正在思考，请稍候...';
+    const raw = await callDeepSeek(msgs);
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('AI 未返回有效 JSON，请重试');
+    const d = JSON.parse(jsonMatch[0]);
+    status.textContent = '✅ 生成完成！正在填入表单...';
+    // Fill Step 1
+    if (d.niche) document.getElementById('niche').value = d.niche;
+    if (d.avatar) document.getElementById('avatar').value = d.avatar;
+    // Fill Step 2
+    if (d.primaryGoal) document.getElementById('primary-goal').value = d.primaryGoal;
+    if (d.transformBefore || d.transformAfter) document.getElementById('transformation').value = `【之前】${d.transformBefore||''}\n\n【之后】${d.transformAfter||''}`;
+    // Fill Step 4
+    problems = [];
+    (d.problems||[]).forEach(text => problems.push({ id: Date.now()+Math.random(), text }));
+    renderProblems();
+    // Store solutions for Step 5
+    window._aiGeneratedSolutions = d.solutions || [];
+    // Fill Step 6
+    if (d.price) { document.getElementById('offer-price').value = d.price; }
+    if (d.clientValue) { document.getElementById('client-value').value = d.clientValue; }
+    calcPricing();
+    // Fill Step 7
+    bonuses = [];
+    (d.bonuses||[]).forEach(b => bonuses.push({ id: Date.now()+Math.random(), name:b.name||'', value:b.value||0, desc:b.desc||'' }));
+    // Fill Step 8
+    if (d.guaranteeText) document.getElementById('guarantee-text').value = d.guaranteeText;
+    // Fill Step 9
+    if (d.scarcityText) document.getElementById('scarcity-text').value = d.scarcityText;
+    // Fill Step 10
+    if (d.offerName) { document.getElementById('final-name').value = d.offerName; document.getElementById('final-name').dataset.manuallyEdited = '1'; document.getElementById('name-generated').textContent = d.offerName; }
+    closeQuickGenModal();
+    showStep(1);
+    alert(`✅ AI 已生成完整报价框架！\n\n报价名称：${d.offerName||'未命名'}\n报价价格：¥${(d.price||0).toLocaleString()}\n\n请逐步检查每个步骤的内容后，点击"生成大满贯报价"。`);
+  } catch(e) {
+    status.innerHTML = `❌ 生成失败：${e.message}<br><span style="font-size:12px">请检查 API Key 是否正确，或稍后重试</span>`;
+    btn.disabled = false;
+    btn.innerHTML = '⚡ 立即生成完整报价';
+  } finally {
+    if (!btn.disabled) return;
+    btn.disabled = false;
+    btn.innerHTML = '⚡ 立即生成完整报价';
+  }
+}
+
+// ---- Chat Widget ----
+const chatHistory = [
+  { role: 'system', content: 'You are an expert consultant on Alex Hormozi\'s $100M Offers methodology. Help users build Grand Slam Offers in Chinese. Be concise, practical, and actionable. Answer in Chinese.' }
+];
+
+function toggleChat() {
+  const panel = document.getElementById('chat-panel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) document.getElementById('chat-input').focus();
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const msgs = document.getElementById('chat-messages');
+  const sendBtn = document.getElementById('chat-send-btn');
+  input.value = ''; sendBtn.disabled = true;
+  // User message
+  const userEl = document.createElement('div');
+  userEl.className = 'chat-msg user'; userEl.textContent = text;
+  msgs.appendChild(userEl);
+  // AI placeholder
+  const aiEl = document.createElement('div');
+  aiEl.className = 'chat-msg ai'; aiEl.textContent = '⏳';
+  msgs.appendChild(aiEl);
+  msgs.scrollTop = msgs.scrollHeight;
+  chatHistory.push({ role: 'user', content: text });
+  try {
+    const result = await callDeepSeek(chatHistory, { stream: true, onChunk: (t) => {
+      aiEl.textContent = t; msgs.scrollTop = msgs.scrollHeight;
+    }});
+    chatHistory.push({ role: 'assistant', content: result });
+    if (chatHistory.length > 22) chatHistory.splice(1, 2);
+  } catch(e) {
+    aiEl.innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`;
+    chatHistory.pop();
+  } finally {
+    sendBtn.disabled = false; msgs.scrollTop = msgs.scrollHeight;
+  }
+}
+
+// =====================================================================
+// COPY
+// =====================================================================
+function copyOfferText() {
+  const el = document.getElementById('offer-doc');
+  const text = el.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('✅ 报价内容已复制到剪贴板！');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('✅ 报价内容已复制！');
+  });
+}
+</script>
+
+</body>
+</html>
