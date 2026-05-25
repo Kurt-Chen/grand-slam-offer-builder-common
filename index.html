@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -523,6 +522,129 @@
       .offer-doc { border-color: #000; box-shadow: none; }
       .offer-doc-header { background: #f5f5f5; }
     }
+
+    /* ==================== AI FEATURES ==================== */
+    .btn-ai {
+      background: linear-gradient(135deg, #5B21B6, #7C3AED);
+      color: #fff; font-weight: 700; font-size: 14px;
+      padding: 10px 20px; border: none; border-radius: var(--r);
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-ai:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
+    .btn-ai:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+    @keyframes ai-spin { to { transform: rotate(360deg); } }
+    .ai-spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: ai-spin 0.7s linear infinite; flex-shrink: 0;
+    }
+    .ai-result-box {
+      background: linear-gradient(135deg, rgba(91,33,182,0.05), rgba(124,58,237,0.02));
+      border: 1px solid rgba(124,58,237,0.25); border-radius: var(--r);
+      padding: 16px; margin-top: 12px; font-size: 14px; line-height: 1.8;
+      white-space: pre-wrap; color: var(--text);
+    }
+    .ai-result-header {
+      font-size: 12px; font-weight: 700; color: #7C3AED;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    }
+    /* AI Modal */
+    .ai-modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+      z-index: 200; align-items: center; justify-content: center; padding: 20px;
+    }
+    .ai-modal-overlay.open { display: flex; }
+    .ai-modal {
+      background: var(--card); border-radius: var(--r2); padding: 32px;
+      max-width: 560px; width: 100%; max-height: 85vh; overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+      border: 1px solid rgba(124,58,237,0.2);
+    }
+    .ai-modal-title {
+      font-size: 22px; font-weight: 800; margin-bottom: 6px;
+      background: linear-gradient(135deg, #5B21B6, #7C3AED);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .ai-modal-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+    .ai-names-grid { display: grid; gap: 8px; margin: 12px 0; }
+    .ai-name-option {
+      background: var(--bg2); border: 1.5px solid var(--border);
+      border-radius: var(--r); padding: 12px 16px; cursor: pointer;
+      transition: all 0.2s; font-size: 15px; font-weight: 700;
+    }
+    .ai-name-option:hover { border-color: #7C3AED; background: rgba(124,58,237,0.05); }
+    .ai-name-option.selected { border-color: #7C3AED; background: rgba(124,58,237,0.1); color: #5B21B6; }
+    /* Chat Widget */
+    .chat-fab {
+      position: fixed; bottom: 68px; right: 20px; z-index: 150;
+      width: 52px; height: 52px; border-radius: 50%;
+      background: linear-gradient(135deg, #5B21B6, #7C3AED);
+      border: none; cursor: pointer; font-size: 22px;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.45);
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+    }
+    .chat-fab:hover { transform: scale(1.1); }
+    .chat-panel {
+      position: fixed; bottom: 132px; right: 20px; z-index: 149;
+      width: 360px; height: 480px;
+      background: var(--card); border-radius: var(--r2);
+      border: 1px solid rgba(124,58,237,0.2);
+      box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+      display: none; flex-direction: column; overflow: hidden;
+      animation: slideUp 0.25s ease;
+    }
+    .chat-panel.open { display: flex; }
+    .chat-header {
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(135deg, #5B21B6, #7C3AED); flex-shrink: 0;
+    }
+    .chat-header-title { font-weight: 700; font-size: 14px; color: #fff; }
+    .chat-header-sub { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 1px; }
+    .chat-close {
+      background: none; border: none; color: rgba(255,255,255,0.8);
+      font-size: 20px; cursor: pointer; line-height: 1; padding: 0; flex-shrink: 0;
+    }
+    .chat-close:hover { color: #fff; }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 14px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .chat-msg { max-width: 88%; font-size: 13px; line-height: 1.65; }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #5B21B6, #7C3AED);
+      color: #fff; border-radius: 14px 14px 2px 14px; padding: 9px 13px;
+    }
+    .chat-msg.ai {
+      align-self: flex-start; background: var(--bg2);
+      border: 1px solid var(--border); border-radius: 14px 14px 14px 2px;
+      padding: 9px 13px; white-space: pre-wrap;
+    }
+    .chat-input-area {
+      padding: 10px 12px; border-top: 1px solid var(--border);
+      display: flex; gap: 8px; background: var(--card); flex-shrink: 0;
+    }
+    .chat-input-area input {
+      flex: 1; font-size: 13px; padding: 8px 12px; border-radius: 20px;
+      border: 1.5px solid var(--border); background: var(--bg2); outline: none;
+      min-width: 0;
+    }
+    .chat-input-area input:focus { border-color: #7C3AED; }
+    .chat-send-btn {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #5B21B6, #7C3AED);
+      border: none; color: #fff; cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center; transition: opacity 0.2s;
+    }
+    .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    @media (max-width: 480px) {
+      .chat-panel { width: calc(100vw - 32px); right: 16px; }
+      .chat-fab { right: 16px; }
+    }
   </style>
 </head>
 <body>
@@ -534,7 +656,10 @@
       <div class="logo-title">大满贯报价制作系统</div>
       <div class="logo-sub">Alex Hormozi · $100M Offers 方法论</div>
     </div>
-    <div class="step-indicator">第 <span id="cur-step">1</span> 步 / 共 10 步</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="step-indicator">第 <span id="cur-step">1</span> 步 / 共 10 步</div>
+      <button class="btn-ai" style="font-size:12px;padding:6px 12px;border-radius:8px" onclick="openQuickGenModal()">⚡ AI一键生成</button>
+    </div>
   </div>
   <div class="progress-track">
     <div class="progress-fill" id="progress-fill" style="width:10%"></div>
@@ -653,6 +778,9 @@
       <label class="field-label">次要收益（购买后的额外好处）</label>
       <input type="text" id="secondary-goals" placeholder="例：精力提升、睡眠改善、获得家人认可、重拾自信心">
     </div>
+
+    <button class="btn-ai" id="ai-btn-step2" onclick="aiSuggestStep2()" style="width:100%;margin-top:4px">✨ AI 建议：根据利基自动填写梦想结果</button>
+    <div class="ai-result-box" id="ai-result-step2" style="display:none"></div>
   </div>
 
   <div class="btn-nav">
@@ -801,6 +929,7 @@
       <input type="text" id="problem-input" placeholder="输入一个障碍或顾虑..." onkeydown="if(event.key==='Enter')addProblem()">
       <button class="btn-gold" onclick="addProblem()" style="white-space:nowrap">+ 添加</button>
     </div>
+    <button class="btn-ai" id="ai-btn-step4" onclick="aiSuggestObstacles()" style="width:100%;margin-bottom:16px">✨ AI 建议：根据你的利基生成10个核心障碍</button>
 
     <div class="card-title" style="margin-bottom:10px">⚡ 常见障碍（点击快速添加）</div>
     <div class="tag-group" style="margin-bottom:20px" id="suggestion-tags">
@@ -991,6 +1120,7 @@
   <div id="bonuses-list"></div>
 
   <button class="btn-add" onclick="addBonus()">+ 添加奖励</button>
+  <button class="btn-ai" id="ai-btn-step7" onclick="aiSuggestBonuses()" style="width:100%;margin-top:10px">✨ AI 建议：自动生成3个高价值奖励方案</button>
 
   <div class="bonus-total-bar" style="margin-top:16px">
     <div>
@@ -1052,6 +1182,7 @@
     <div class="field">
       <label class="field-label">保证描述（用你自己的语言，越具体越有力）</label>
       <textarea id="guarantee-text" rows="5" placeholder="例：如果你在90天内严格按照我们的饮食和运动计划执行，体重没有减少至少10斤，我们将100%退款，不问任何原因——你还可以保留所有的课程资料和工具包。我愿意承担全部风险，因为我对这套系统的效果有绝对信心。"></textarea>
+      <button class="btn-ai" id="ai-btn-step8" onclick="aiSuggestGuarantee()" style="width:100%;margin-top:8px">✨ AI 建议：生成强力保证文案</button>
     </div>
     <div class="field">
       <label class="field-label">保证期限</label>
@@ -1140,6 +1271,7 @@
   <div class="card" style="margin-top:16px">
     <div class="card-title">✍️ 综合稀缺/紧迫说明</div>
     <textarea id="scarcity-text" rows="4" placeholder="用一段完整的文字描述你的稀缺性和紧迫感...&#10;&#10;例：我们每期只接收20名学员，以确保每个人都能获得个性化关注。本期报名截止日期为X月X日，错过后下一期开放时间不确定（通常需要等待3-6个月）。今日报名还可额外获得价值1,980元的1对1启动诊断，名额仅剩3个。"></textarea>
+    <button class="btn-ai" id="ai-btn-step9" onclick="aiSuggestScarcity()" style="width:100%;margin-top:8px">✨ AI 建议：生成稀缺性与紧迫感文案</button>
   </div>
 
   <div class="btn-nav">
@@ -1213,9 +1345,12 @@
     </div>
 
     <div class="name-preview">
-      <div class="label">AI 自动生成名称预览</div>
+      <div class="label">自动生成名称预览</div>
       <div class="generated" id="name-generated">填写上方信息后自动生成</div>
     </div>
+
+    <button class="btn-ai" id="ai-btn-step10" onclick="aiGenerateNames()" style="width:100%;margin-bottom:12px">✨ AI 生成器：批量生成5个 MAGIC 报价名称</button>
+    <div id="ai-names-container"></div>
 
     <div class="field">
       <label class="field-label">最终确认的报价名称（可手动修改）</label>
@@ -1315,6 +1450,53 @@
 
 <!-- STEP DOTS -->
 <div class="dots-nav no-print" id="dots-nav"></div>
+
+<!-- AI Chat Widget -->
+<button class="chat-fab no-print" id="chat-fab" onclick="toggleChat()" title="AI 报价顾问">💬</button>
+<div class="chat-panel no-print" id="chat-panel">
+  <div class="chat-header">
+    <div>
+      <div class="chat-header-title">AI 报价顾问</div>
+      <div class="chat-header-sub">DeepSeek · Hormozi $100M Offers 专家</div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">×</button>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-msg ai">你好！我是你的 AI 报价顾问，专注于 Alex Hormozi 的《$100M Offers》方法论。有任何关于定价策略、价值堆叠、保证设计或报价命名的问题，尽管问我！</div>
+  </div>
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="问任何关于报价设计的问题..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}">
+    <button class="chat-send-btn" id="chat-send-btn" onclick="sendChatMessage()">↑</button>
+  </div>
+</div>
+
+<!-- AI Quick Generate Modal -->
+<div class="ai-modal-overlay no-print" id="quick-gen-modal" onclick="if(event.target===this)closeQuickGenModal()">
+  <div class="ai-modal">
+    <div class="ai-modal-title">⚡ AI 一键生成报价</div>
+    <div class="ai-modal-desc">只需填写行业和目标客户，AI 将自动填写全部 10 个步骤，生成完整的大满贯报价框架（约 30 秒）。</div>
+    <div class="field">
+      <label class="field-label">你的行业 / 服务类型</label>
+      <input type="text" id="qg-industry" placeholder="例：健身教练、企业管理咨询、少儿英语培训、电商运营">
+    </div>
+    <div class="field">
+      <label class="field-label">目标客户描述</label>
+      <input type="text" id="qg-target" placeholder="例：30-45岁想产后瘦身的职场宝妈">
+    </div>
+    <div class="field">
+      <label class="field-label">期望报价价格（选填，留空由 AI 建议）</label>
+      <div class="price-input-wrap">
+        <span class="price-prefix">¥</span>
+        <input type="number" id="qg-price" placeholder="例：9800">
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+      <button class="btn-ai" id="qg-btn" onclick="aiQuickGenerate()" style="flex:1;min-width:180px">⚡ 立即生成完整报价</button>
+      <button class="btn-ghost" onclick="closeQuickGenModal()" style="padding:10px 20px">取消</button>
+    </div>
+    <div id="qg-status" style="margin-top:16px;font-size:13px;color:var(--muted);text-align:center;display:none;line-height:1.6"></div>
+  </div>
+</div>
 
 
 <script>
@@ -1484,6 +1666,15 @@ function initSolutionsStep() {
       </div>
     </div>
   `).join('');
+
+  // Apply AI-generated solutions if available
+  if (window._aiGeneratedSolutions && window._aiGeneratedSolutions.length > 0) {
+    problems.forEach((p, i) => {
+      const el = document.getElementById(`sol-${p.id}`);
+      if (el && window._aiGeneratedSolutions[i]) el.value = window._aiGeneratedSolutions[i];
+    });
+    window._aiGeneratedSolutions = null;
+  }
 }
 
 function addExtraSolution() {
@@ -1805,6 +1996,334 @@ function buildFinalOffer() {
   document.getElementById('cur-step').textContent = TOTAL;
   updateDots();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// =====================================================================
+// DEEPSEEK AI INTEGRATION
+// =====================================================================
+const DEEPSEEK_API_KEY = 'sk-69d6233109684b43b90985bfe695fc8c';
+
+async function callDeepSeek(messages, { stream = false, onChunk } = {}) {
+  const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+    },
+    body: JSON.stringify({ model: 'deepseek-chat', messages, max_tokens: 2000, stream })
+  });
+  if (!response.ok) {
+    let msg = `HTTP ${response.status}`;
+    try { const e = await response.json(); msg = e.error?.message || msg; } catch(_) {}
+    throw new Error(msg);
+  }
+  if (stream && onChunk) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let full = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      for (const line of decoder.decode(value).split('\n')) {
+        if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+          try {
+            const delta = JSON.parse(line.slice(6)).choices[0]?.delta?.content || '';
+            if (delta) { full += delta; onChunk(full); }
+          } catch(_) {}
+        }
+      }
+    }
+    return full;
+  }
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+function getOfferContext() {
+  return {
+    market: selectedMarket,
+    niche: document.getElementById('niche')?.value || '',
+    avatar: document.getElementById('avatar')?.value || '',
+    primaryGoal: document.getElementById('primary-goal')?.value || '',
+    problems: problems.map(p => p.text).join('、'),
+    price: document.getElementById('offer-price')?.value || ''
+  };
+}
+
+function setAiBtn(id, loading) {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) {
+    btn.dataset.origHtml = btn.innerHTML;
+    btn.innerHTML = '<span class="ai-spinner"></span> AI 思考中...';
+  } else if (btn.dataset.origHtml) {
+    btn.innerHTML = btn.dataset.origHtml;
+  }
+}
+
+// ---- Step 2: Dream Outcome ----
+let _lastStep2Result = '';
+async function aiSuggestStep2() {
+  const ctx = getOfferContext();
+  if (!ctx.niche && !ctx.avatar) { alert('请先在步骤1填写你的利基市场和客户画像'); return; }
+  setAiBtn('ai-btn-step2', true);
+  const box = document.getElementById('ai-result-step2');
+  box.style.display = 'block';
+  box.innerHTML = '<div class="ai-result-header">✨ AI 正在生成建议...</div>';
+  try {
+    const msgs = [
+      { role: 'system', content: 'You are an expert in Alex Hormozi\'s $100M Offers. Respond in Chinese, concise and powerful.' },
+      { role: 'user', content: `根据以下信息，帮我填写大满贯报价的梦想结果模块：\n市场：${ctx.market==='health'?'健康':ctx.market==='wealth'?'财富':'关系'}\n利基：${ctx.niche}\n客户画像：${ctx.avatar}\n\n请严格按以下格式输出（不要多余的话）：\n主要结果：[具体可量化的核心承诺，30字以内]\n之前状态：[客户现在的痛苦状态，2句话]\n之后状态：[达成目标后的美好状态，2句话]\n时间框架：[建议的时间框架]\n次要收益：[3-5个次要收益，逗号分隔]` }
+    ];
+    const result = await callDeepSeek(msgs, { stream: true, onChunk: (t) => {
+      box.innerHTML = `<div class="ai-result-header">✨ AI 建议（实时生成中）</div><div style="color:var(--text)">${t}</div>`;
+    }});
+    _lastStep2Result = result;
+    box.innerHTML = `<div class="ai-result-header">✨ AI 建议已生成</div><div style="color:var(--text);margin-bottom:10px">${result}</div>
+      <button class="btn-ai" onclick="applyStep2Suggestions()" style="width:100%;font-size:13px">✅ 应用此建议到表单</button>`;
+  } catch(e) {
+    box.innerHTML = `<div class="ai-result-header" style="color:var(--red)">❌ 生成失败：${e.message}</div>`;
+  } finally { setAiBtn('ai-btn-step2', false); }
+}
+
+function applyStep2Suggestions() {
+  const lines = _lastStep2Result.split('\n').map(l => l.trim()).filter(Boolean);
+  const get = (prefix) => lines.find(l => l.startsWith(prefix))?.slice(prefix.length).trim() || '';
+  const goal = get('主要结果：');
+  const before = get('之前状态：');
+  const after = get('之后状态：');
+  const tf = get('时间框架：');
+  const secondary = get('次要收益：');
+  if (goal) document.getElementById('primary-goal').value = goal;
+  if (secondary) document.getElementById('secondary-goals').value = secondary;
+  if (before || after) document.getElementById('transformation').value = `【之前】${before}\n\n【之后】${after}`;
+  if (tf) document.getElementById('timeframe-custom').value = tf;
+  alert('✅ 已应用 AI 建议到表单！');
+}
+
+// ---- Step 4: Obstacles ----
+async function aiSuggestObstacles() {
+  const ctx = getOfferContext();
+  if (!ctx.niche && !ctx.avatar) { alert('请先在步骤1填写你的利基市场'); return; }
+  setAiBtn('ai-btn-step4', true);
+  try {
+    const msgs = [
+      { role: 'system', content: 'You are an expert in Alex Hormozi\'s $100M Offers. Respond in Chinese.' },
+      { role: 'user', content: `针对以下利基，列出客户在追求目标时最常遇到的10个障碍（外部、内部、实际各至少2个）：\n利基：${ctx.niche}\n客户画像：${ctx.avatar}\n梦想结果：${ctx.primaryGoal}\n\n每个障碍单独一行，不要编号，不要多余说明，每条15字以内：` }
+    ];
+    const result = await callDeepSeek(msgs);
+    const list = result.split('\n').map(l => l.replace(/^[\d\-\.、\*]+\s*/, '').trim()).filter(l => l && l.length > 2 && l.length < 60);
+    if (!list.length) throw new Error('未能解析障碍列表');
+    if (confirm(`AI 为你生成了 ${list.length} 个障碍：\n\n${list.join('\n')}\n\n点击确定将追加到现有列表`)) {
+      list.forEach(text => problems.push({ id: Date.now() + Math.random(), text }));
+      renderProblems();
+    }
+  } catch(e) { alert('AI 建议生成失败：' + e.message); }
+  finally { setAiBtn('ai-btn-step4', false); }
+}
+
+// ---- Step 7: Bonuses ----
+async function aiSuggestBonuses() {
+  const ctx = getOfferContext();
+  setAiBtn('ai-btn-step7', true);
+  try {
+    const msgs = [
+      { role: 'system', content: 'You are an expert in Alex Hormozi\'s $100M Offers. Respond in Chinese.' },
+      { role: 'user', content: `为以下报价设计3个高价值赠品/奖励方案：\n利基：${ctx.niche||'专业服务'}\n核心障碍：${ctx.problems||'未知'}\n报价价格：${ctx.price?'¥'+ctx.price:'待定'}\n\n每个奖励格式如下（严格按此格式）：\n奖励1名称：...\n奖励1价值：...(纯数字)\n奖励1说明：...(20字以内)\n奖励2名称：...\n奖励2价值：...\n奖励2说明：...\n奖励3名称：...\n奖励3价值：...\n奖励3说明：...` }
+    ];
+    const result = await callDeepSeek(msgs);
+    const lines = result.split('\n').map(l => l.trim()).filter(Boolean);
+    const newBonuses = [];
+    let cur = null;
+    for (const line of lines) {
+      if (/奖励\d名称：/.test(line)) { if (cur?.name) newBonuses.push(cur); cur = { id: Date.now()+Math.random(), name: line.split('：').slice(1).join('：').trim(), value: 0, desc: '' }; }
+      else if (/奖励\d价值：/.test(line) && cur) { cur.value = parseFloat(line.split('：').slice(1).join('：')) || 0; }
+      else if (/奖励\d说明：/.test(line) && cur) { cur.desc = line.split('：').slice(1).join('：').trim(); }
+    }
+    if (cur?.name) newBonuses.push(cur);
+    if (!newBonuses.length) throw new Error('未能解析奖励方案');
+    newBonuses.forEach(b => bonuses.push(b));
+    renderBonuses(); updateBonusTotal();
+    alert(`✅ 已添加 ${newBonuses.length} 个 AI 生成的奖励方案！`);
+  } catch(e) { alert('AI 建议生成失败：' + e.message); }
+  finally { setAiBtn('ai-btn-step7', false); }
+}
+
+// ---- Step 8: Guarantee ----
+async function aiSuggestGuarantee() {
+  const ctx = getOfferContext();
+  setAiBtn('ai-btn-step8', true);
+  try {
+    const typeMap = { unconditional:'无条件退款保证', conditional:'结果保证（有条件）', service:'服务延续保证', anti:'反向保证' };
+    const msgs = [
+      { role: 'system', content: 'You are an expert copywriter for Alex Hormozi\'s $100M Offers. Write in Chinese.' },
+      { role: 'user', content: `为以下报价撰写一段有力的保证文案：\n保证类型：${typeMap[selectedGuarantee]||'结果保证'}\n利基：${ctx.niche||'专业服务'}\n梦想结果：${ctx.primaryGoal||'达成目标'}\n报价价格：${ctx.price?'¥'+ctx.price:'不定'}\n\n要求：120字左右，包含具体条件和时限，语气自信真诚，直接输出文案不要标题。` }
+    ];
+    const result = await callDeepSeek(msgs);
+    document.getElementById('guarantee-text').value = result.trim();
+    alert('✅ 保证文案已填入！');
+  } catch(e) { alert('AI 建议生成失败：' + e.message); }
+  finally { setAiBtn('ai-btn-step8', false); }
+}
+
+// ---- Step 9: Scarcity ----
+async function aiSuggestScarcity() {
+  const ctx = getOfferContext();
+  setAiBtn('ai-btn-step9', true);
+  try {
+    const msgs = [
+      { role: 'system', content: 'You are an expert copywriter for Alex Hormozi\'s $100M Offers. Write in Chinese.' },
+      { role: 'user', content: `为以下报价撰写稀缺性和紧迫感说明：\n利基：${ctx.niche||'专业服务'}\n\n要求：100字左右，必须真实可执行，包含具体数字（名额/时间限制），语气诚恳不夸张，直接输出文案。` }
+    ];
+    const result = await callDeepSeek(msgs);
+    document.getElementById('scarcity-text').value = result.trim();
+    alert('✅ 稀缺说明文案已填入！');
+  } catch(e) { alert('AI 建议生成失败：' + e.message); }
+  finally { setAiBtn('ai-btn-step9', false); }
+}
+
+// ---- Step 10: Name Generator ----
+async function aiGenerateNames() {
+  const ctx = getOfferContext();
+  setAiBtn('ai-btn-step10', true);
+  const container = document.getElementById('ai-names-container');
+  container.innerHTML = '<div style="text-align:center;color:var(--muted);padding:16px;font-size:13px">⏳ AI 正在生成名称方案...</div>';
+  try {
+    const a = document.getElementById('name-a').value.trim();
+    const g = document.getElementById('name-g').value.trim();
+    const iv = document.getElementById('name-i').value.trim();
+    const c = document.getElementById('name-c').value.trim();
+    const msgs = [
+      { role: 'system', content: 'You are an expert in Alex Hormozi\'s MAGIC offer naming. Generate compelling Chinese names.' },
+      { role: 'user', content: `用 MAGIC 命名框架生成5个不同风格的报价名称：\n利基：${ctx.niche||'专业服务'}\n目标人群：${a||ctx.avatar?.slice(0,20)||'目标客户'}\n核心结果：${g||ctx.primaryGoal||'达成目标'}\n时间框架：${iv||'90天'}\n载体形式：${c||'训练营'}\n\n要求：每个名称独占一行，风格各异（数字型/情感型/承诺型/方法型/结果型），8-20字，直接输出5个名称，不要编号和多余说明。` }
+    ];
+    const result = await callDeepSeek(msgs);
+    const names = result.split('\n').map(l => l.replace(/^[\d\-\.、\*]+\s*/, '').trim()).filter(l => l && l.length > 3 && l.length < 50);
+    if (!names.length) throw new Error('未能解析名称');
+    container.innerHTML = `<div class="card" style="margin-bottom:16px">
+      <div class="card-title" style="margin-bottom:12px">✨ AI 生成的5个名称方案（点击选择）</div>
+      <div class="ai-names-grid">${names.map(n => `<div class="ai-name-option" onclick="selectAiName(this,'${n.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">${n}</div>`).join('')}</div>
+    </div>`;
+  } catch(e) {
+    container.innerHTML = `<div style="color:var(--red);font-size:13px;padding:8px">❌ 生成失败：${e.message}</div>`;
+  } finally { setAiBtn('ai-btn-step10', false); }
+}
+
+function selectAiName(el, name) {
+  document.querySelectorAll('.ai-name-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('final-name').value = name;
+  document.getElementById('final-name').dataset.manuallyEdited = '1';
+  document.getElementById('name-generated').textContent = name;
+}
+
+// ---- Quick Generate (One-click) ----
+function openQuickGenModal() { document.getElementById('quick-gen-modal').classList.add('open'); }
+function closeQuickGenModal() { document.getElementById('quick-gen-modal').classList.remove('open'); }
+
+async function aiQuickGenerate() {
+  const industry = document.getElementById('qg-industry').value.trim();
+  const target = document.getElementById('qg-target').value.trim();
+  if (!industry || !target) { alert('请填写行业/服务和目标客户'); return; }
+  const priceInput = document.getElementById('qg-price').value.trim();
+  const btn = document.getElementById('qg-btn');
+  const status = document.getElementById('qg-status');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ai-spinner"></span> AI 生成中（约30秒）...';
+  status.style.display = 'block';
+  status.textContent = '⏳ AI 正在生成完整报价框架，请稍候...';
+  try {
+    const suggestedPrice = priceInput ? parseInt(priceInput.replace(/[^\d]/g,'')) : 9800;
+    const msgs = [
+      { role: 'system', content: 'You are an expert in Alex Hormozi\'s $100M Offers. Generate complete offer frameworks as valid JSON in Chinese.' },
+      { role: 'user', content: `为以下业务生成完整的大满贯报价框架，以合法JSON格式输出，所有字符串值中不要有换行符：\n行业/服务：${industry}\n目标客户：${target}\n${priceInput?'期望价格：¥'+suggestedPrice:''}\n\n严格按此JSON格式输出：\n{"niche":"利基描述30字","avatar":"客户画像50字","primaryGoal":"核心结果承诺30字","transformBefore":"之前痛苦30字","transformAfter":"之后状态30字","problems":["障碍1","障碍2","障碍3","障碍4","障碍5","障碍6","障碍7","障碍8"],"solutions":["方案1","方案2","方案3","方案4","方案5","方案6","方案7","方案8"],"price":${suggestedPrice},"clientValue":${suggestedPrice*5},"bonuses":[{"name":"奖励名称1","value":1980,"desc":"功能说明1"},{"name":"奖励名称2","value":1280,"desc":"功能说明2"},{"name":"奖励名称3","value":980,"desc":"功能说明3"}],"guaranteeText":"保证文案80字","scarcityText":"稀缺说明60字","offerName":"报价名称8-15字"}` }
+    ];
+    status.textContent = '⏳ AI 正在思考，请稍候...';
+    const raw = await callDeepSeek(msgs);
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('AI 未返回有效 JSON，请重试');
+    const d = JSON.parse(jsonMatch[0]);
+    status.textContent = '✅ 生成完成！正在填入表单...';
+    // Fill Step 1
+    if (d.niche) document.getElementById('niche').value = d.niche;
+    if (d.avatar) document.getElementById('avatar').value = d.avatar;
+    // Fill Step 2
+    if (d.primaryGoal) document.getElementById('primary-goal').value = d.primaryGoal;
+    if (d.transformBefore || d.transformAfter) document.getElementById('transformation').value = `【之前】${d.transformBefore||''}\n\n【之后】${d.transformAfter||''}`;
+    // Fill Step 4
+    problems = [];
+    (d.problems||[]).forEach(text => problems.push({ id: Date.now()+Math.random(), text }));
+    renderProblems();
+    // Store solutions for Step 5
+    window._aiGeneratedSolutions = d.solutions || [];
+    // Fill Step 6
+    if (d.price) { document.getElementById('offer-price').value = d.price; }
+    if (d.clientValue) { document.getElementById('client-value').value = d.clientValue; }
+    calcPricing();
+    // Fill Step 7
+    bonuses = [];
+    (d.bonuses||[]).forEach(b => bonuses.push({ id: Date.now()+Math.random(), name:b.name||'', value:b.value||0, desc:b.desc||'' }));
+    // Fill Step 8
+    if (d.guaranteeText) document.getElementById('guarantee-text').value = d.guaranteeText;
+    // Fill Step 9
+    if (d.scarcityText) document.getElementById('scarcity-text').value = d.scarcityText;
+    // Fill Step 10
+    if (d.offerName) { document.getElementById('final-name').value = d.offerName; document.getElementById('final-name').dataset.manuallyEdited = '1'; document.getElementById('name-generated').textContent = d.offerName; }
+    closeQuickGenModal();
+    showStep(1);
+    alert(`✅ AI 已生成完整报价框架！\n\n报价名称：${d.offerName||'未命名'}\n报价价格：¥${(d.price||0).toLocaleString()}\n\n请逐步检查每个步骤的内容后，点击"生成大满贯报价"。`);
+  } catch(e) {
+    status.innerHTML = `❌ 生成失败：${e.message}<br><span style="font-size:12px">请检查 API Key 是否正确，或稍后重试</span>`;
+    btn.disabled = false;
+    btn.innerHTML = '⚡ 立即生成完整报价';
+  } finally {
+    if (!btn.disabled) return;
+    btn.disabled = false;
+    btn.innerHTML = '⚡ 立即生成完整报价';
+  }
+}
+
+// ---- Chat Widget ----
+const chatHistory = [
+  { role: 'system', content: 'You are an expert consultant on Alex Hormozi\'s $100M Offers methodology. Help users build Grand Slam Offers in Chinese. Be concise, practical, and actionable. Answer in Chinese.' }
+];
+
+function toggleChat() {
+  const panel = document.getElementById('chat-panel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) document.getElementById('chat-input').focus();
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const msgs = document.getElementById('chat-messages');
+  const sendBtn = document.getElementById('chat-send-btn');
+  input.value = ''; sendBtn.disabled = true;
+  // User message
+  const userEl = document.createElement('div');
+  userEl.className = 'chat-msg user'; userEl.textContent = text;
+  msgs.appendChild(userEl);
+  // AI placeholder
+  const aiEl = document.createElement('div');
+  aiEl.className = 'chat-msg ai'; aiEl.textContent = '⏳';
+  msgs.appendChild(aiEl);
+  msgs.scrollTop = msgs.scrollHeight;
+  chatHistory.push({ role: 'user', content: text });
+  try {
+    const result = await callDeepSeek(chatHistory, { stream: true, onChunk: (t) => {
+      aiEl.textContent = t; msgs.scrollTop = msgs.scrollHeight;
+    }});
+    chatHistory.push({ role: 'assistant', content: result });
+    if (chatHistory.length > 22) chatHistory.splice(1, 2);
+  } catch(e) {
+    aiEl.innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`;
+    chatHistory.pop();
+  } finally {
+    sendBtn.disabled = false; msgs.scrollTop = msgs.scrollHeight;
+  }
 }
 
 // =====================================================================
