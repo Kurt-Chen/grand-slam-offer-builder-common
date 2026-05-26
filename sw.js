@@ -1,6 +1,12 @@
-const CACHE = 'dmsb-v2';
+const CACHE = 'dmsb-v3';
 const BASE = '/grand-slam-offer-builder-claude-/';
-const ASSETS = [BASE, BASE + 'index.html', BASE + 'manifest.json'];
+const ASSETS = [
+  BASE,
+  BASE + 'index.html',
+  BASE + 'manifest.json',
+  BASE + 'icon192.png',
+  BASE + 'icon512.png'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
