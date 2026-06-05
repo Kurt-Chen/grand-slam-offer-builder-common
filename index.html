@@ -76,10 +76,10 @@
     /* ==================== LAYOUT ==================== */
     .page-layout {
       display: flex;
-      max-width: 1100px;
+      max-width: 1360px;
       margin: 0 auto;
       padding: 32px 20px;
-      gap: 24px;
+      gap: 20px;
       align-items: flex-start;
     }
     main { flex: 1; min-width: 0; }
@@ -163,12 +163,155 @@
       color: var(--text);
       font-weight: 700;
     }
+    .knowledge-sidebar {
+      width: 286px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 80px;
+      max-height: calc(100vh - 96px);
+      overflow: auto;
+      padding-right: 2px;
+    }
+    .knowledge-panel {
+      background: rgba(255,255,255,0.82);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px;
+      box-shadow: 0 12px 30px rgba(26,29,46,0.06);
+    }
+    .knowledge-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .knowledge-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.25;
+    }
+    .knowledge-count {
+      font-size: 11px;
+      color: var(--gold);
+      font-weight: 800;
+      white-space: nowrap;
+      padding-top: 2px;
+    }
+    .knowledge-controls {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .knowledge-select,
+    .knowledge-search {
+      width: 100%;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg2);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 650;
+      padding: 0 10px;
+      outline: none;
+    }
+    .knowledge-search {
+      font-weight: 500;
+    }
+    .knowledge-select:focus,
+    .knowledge-search:focus {
+      border-color: var(--gold);
+      background: #fff;
+    }
+    .knowledge-helper {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+    .knowledge-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .knowledge-item {
+      border: 1px solid rgba(221,224,236,0.9);
+      background: #fff;
+      border-radius: 8px;
+      padding: 11px;
+    }
+    .knowledge-item-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--gold-dark);
+    }
+    .knowledge-id {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      color: var(--muted);
+    }
+    .knowledge-page {
+      color: var(--gold-dark);
+      background: rgba(200,134,10,0.1);
+      border: 1px solid rgba(200,134,10,0.18);
+      border-radius: 999px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+    .knowledge-principle {
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--text);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .knowledge-action {
+      font-size: 11.5px;
+      line-height: 1.45;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+    .knowledge-source {
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px dashed var(--border);
+      padding-top: 7px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .knowledge-empty {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+      padding: 12px;
+      background: var(--bg2);
+      border-radius: 8px;
+    }
     @media (max-width: 860px) {
       .page-layout { flex-direction: column; padding: 16px; }
       .sidebar { width: 100%; position: static; }
+      .knowledge-sidebar { width: 100%; position: static; max-height: none; }
       .sidebar-steps { flex-direction: row; flex-wrap: wrap; }
       .sidebar-step { flex: 0 0 auto; }
       .ss-label { display: none; }
+    }
+    @media (max-width: 1180px) and (min-width: 861px) {
+      .page-layout { gap: 14px; padding-left: 12px; padding-right: 12px; }
+      .sidebar { width: 62px; }
+      .sidebar-title { display: none; }
+      .ss-label { display: none; }
+      .knowledge-sidebar { width: 250px; }
+      .sidebar-step { justify-content: center; padding: 8px; }
     }
 
     /* ==================== STEP CONTAINER ==================== */
@@ -1590,6 +1733,27 @@
 
 </main>
 
+<aside class="knowledge-sidebar no-print" aria-label="章节知识点索引">
+  <div class="knowledge-panel">
+    <div class="knowledge-head">
+      <div>
+        <div class="sidebar-title" style="margin-bottom:4px;padding-left:0">知识点索引</div>
+        <div class="knowledge-title" id="knowledge-title">当前步骤出处</div>
+      </div>
+      <div class="knowledge-count" id="knowledge-count">0条</div>
+    </div>
+    <div class="knowledge-controls">
+      <select class="knowledge-select" id="knowledge-module-select" aria-label="选择知识点章节"></select>
+      <input class="knowledge-search" id="knowledge-search" type="search" placeholder="搜索：定价、保证、稀缺..." aria-label="搜索知识点">
+    </div>
+    <div class="knowledge-helper">
+      <span id="knowledge-helper-text">随步骤自动切换</span>
+      <span>点击章节可查看整章</span>
+    </div>
+    <div class="knowledge-list" id="knowledge-list"></div>
+  </div>
+</aside>
+
 </div><!-- /page-layout -->
 
 <!-- STEP DOTS -->
@@ -1643,6 +1807,7 @@
 </div>
 
 
+<script src="knowledge/offer-knowledge-base.js"></script>
 <script>
 // =====================================================================
 // STATE
@@ -1676,6 +1841,10 @@ function showStep(n) {
 
   updateDots();
   updateSidebar(n);
+  knowledgeSearchQuery = '';
+  const knowledgeSearch = document.getElementById('knowledge-search');
+  if (knowledgeSearch) knowledgeSearch.value = '';
+  renderKnowledgeIndex(STEP_KNOWLEDGE_MODULE[n] || STEP_KNOWLEDGE_MODULE[1]);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   // Special inits
@@ -1716,8 +1885,103 @@ function updateSidebar(n) {
   }
 }
 
+const STEP_KNOWLEDGE_MODULE = {
+  1: '选择饥饿市场',
+  2: '价值方程',
+  3: '价值方程',
+  4: '问题与解决方案',
+  5: '修剪与堆叠',
+  6: '高价与价值差',
+  7: '奖励与赠品',
+  8: '保证',
+  9: '稀缺性',
+  10: '命名',
+  11: '执行与首个里程碑'
+};
+
+let activeKnowledgeModule = STEP_KNOWLEDGE_MODULE[1];
+let knowledgeSearchQuery = '';
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getKnowledgeModules() {
+  const kb = window.OFFER_KNOWLEDGE_BASE || [];
+  return [...new Set(kb.map(item => item.module))];
+}
+
+function renderKnowledgeIndex(moduleName = activeKnowledgeModule) {
+  const kb = window.OFFER_KNOWLEDGE_BASE || [];
+  const title = document.getElementById('knowledge-title');
+  const count = document.getElementById('knowledge-count');
+  const select = document.getElementById('knowledge-module-select');
+  const search = document.getElementById('knowledge-search');
+  const helper = document.getElementById('knowledge-helper-text');
+  const list = document.getElementById('knowledge-list');
+  if (!title || !count || !select || !search || !helper || !list) return;
+
+  const modules = getKnowledgeModules();
+  activeKnowledgeModule = modules.includes(moduleName) ? moduleName : modules[0];
+  const query = knowledgeSearchQuery.trim().toLowerCase();
+  const moduleItems = kb.filter(item => item.module === activeKnowledgeModule);
+  const items = query
+    ? moduleItems.filter(item => [
+        item.id,
+        item.module,
+        item.chapter,
+        item.principle,
+        item.action,
+        item.useWhen,
+        ...(item.tags || [])
+      ].join(' ').toLowerCase().includes(query))
+    : moduleItems;
+
+  title.textContent = activeKnowledgeModule || '知识点索引';
+  count.textContent = query ? `${items.length}/${moduleItems.length}条` : `${items.length}条`;
+  helper.textContent = STEP_KNOWLEDGE_MODULE[currentStep] === activeKnowledgeModule ? '当前步骤相关章节' : '手动查看章节';
+
+  if (select.dataset.ready !== '1') {
+    select.innerHTML = modules.map(module => `
+      <option value="${escapeHtml(module)}">${escapeHtml(module)}</option>
+    `).join('');
+    select.addEventListener('change', () => renderKnowledgeIndex(select.value));
+    search.addEventListener('input', () => {
+      knowledgeSearchQuery = search.value;
+      renderKnowledgeIndex(activeKnowledgeModule);
+    });
+    select.dataset.ready = '1';
+  }
+  select.value = activeKnowledgeModule;
+
+  if (!items.length) {
+    list.innerHTML = query
+      ? '<div class="knowledge-empty">当前章节没有匹配的知识点。换个关键词试试，比如“价格”“风险”“时间”。</div>'
+      : '<div class="knowledge-empty">还没有加载到知识点。请确认 knowledge/offer-knowledge-base.js 存在。</div>';
+    return;
+  }
+
+  list.innerHTML = items.map(item => `
+    <article class="knowledge-item">
+      <div class="knowledge-item-title">
+        <span><span class="knowledge-id">${escapeHtml(item.id)}</span> · ${escapeHtml(item.module)}</span>
+        <span class="knowledge-page">PDF ${escapeHtml(item.source?.pdfPages)}</span>
+      </div>
+      <div class="knowledge-principle">${escapeHtml(item.principle)}</div>
+      <div class="knowledge-action">${escapeHtml(item.action)}</div>
+      <div class="knowledge-source" title="${escapeHtml(item.chapter)}">出处：${escapeHtml(item.chapter)}</div>
+    </article>
+  `).join('');
+}
+
 updateDots();
 updateSidebar(1);
+renderKnowledgeIndex(STEP_KNOWLEDGE_MODULE[1]);
 
 // =====================================================================
 // STEP 1: MARKET
@@ -2454,6 +2718,57 @@ const chatHistory = [
   { role: 'system', content: 'You are an expert consultant on Alex Hormozi\'s $100M Offers methodology. Help users build Grand Slam Offers in Chinese. Be concise, practical, and actionable. Answer in Chinese.' }
 ];
 
+function getCurrentOfferSnapshot() {
+  const ctx = getOfferContext();
+  return [
+    `市场：${ctx.market || '未选择'}`,
+    `利基：${ctx.niche || '未填写'}`,
+    `客户画像：${ctx.avatar || '未填写'}`,
+    `梦想结果：${ctx.primaryGoal || '未填写'}`,
+    `核心障碍：${ctx.problems || '未填写'}`,
+    `报价价格：${ctx.price || '未填写'}`
+  ].join('\n');
+}
+
+function getRelevantKnowledge(query, limit = 6) {
+  const kb = window.OFFER_KNOWLEDGE_BASE || [];
+  const text = `${query || ''} ${getCurrentOfferSnapshot()}`.toLowerCase();
+  const keywords = [
+    '报价', '成交', '广告', '客户', '市场', '利基', '饥饿', '定价', '价格',
+    '高价', '折扣', '价值', '结果', '梦想', '概率', '时间', '努力', '障碍',
+    '问题', '解决', '价值栈', '奖励', '赠品', '稀缺', '紧迫', '保证', '风险',
+    '退款', '命名', '利润', '交付', '执行', '复盘'
+  ];
+
+  return kb
+    .map((item) => {
+      const haystack = [
+        item.module, item.chapter, item.principle, item.action, item.useWhen,
+        ...(item.tags || [])
+      ].join(' ').toLowerCase();
+      let score = 0;
+      for (const word of keywords) {
+        if (text.includes(word) && haystack.includes(word)) score += 3;
+      }
+      for (const raw of text.split(/[\s,，。；;:：、]+/).filter(Boolean)) {
+        if (raw.length >= 2 && haystack.includes(raw)) score += 1;
+      }
+      return { item, score };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(({ item }) => item);
+}
+
+function buildKnowledgeContext(query) {
+  const relevant = getRelevantKnowledge(query, 7);
+  if (!relevant.length) return '暂无匹配知识点。';
+  return relevant.map((item) => (
+    `- ${item.id}｜${item.module}｜${item.principle} 建议动作：${item.action} 出处：${item.chapter}，PDF页${item.source.pdfPages}`
+  )).join('\n');
+}
+
 function toggleChat() {
   const panel = document.getElementById('chat-panel');
   panel.classList.toggle('open');
@@ -2478,7 +2793,16 @@ async function sendChatMessage() {
   msgs.scrollTop = msgs.scrollHeight;
   chatHistory.push({ role: 'user', content: text });
   try {
-    const result = await callDeepSeek(chatHistory, { stream: true, onChunk: (t) => {
+    const sourceContext = buildKnowledgeContext(text);
+    const contextualMessages = [
+      chatHistory[0],
+      {
+        role: 'system',
+        content: `当前报价上下文：\n${getCurrentOfferSnapshot()}\n\n可引用的知识点出处：\n${sourceContext}\n\n回答规则：优先基于这些知识点给建议；每次给出方法论建议时，末尾加“参考出处：”并列出用到的知识点编号、章节和PDF页码；不要编造不存在的页码。`
+      },
+      ...chatHistory.slice(1)
+    ];
+    const result = await callDeepSeek(contextualMessages, { stream: true, onChunk: (t) => {
       aiEl.textContent = t; msgs.scrollTop = msgs.scrollHeight;
     }});
     chatHistory.push({ role: 'assistant', content: result });
