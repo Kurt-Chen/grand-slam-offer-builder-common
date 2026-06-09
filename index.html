@@ -75,21 +75,70 @@
 
     /* ==================== LAYOUT ==================== */
     .page-layout {
-      display: flex;
-      max-width: 1360px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) minmax(260px, 28%);
+      grid-template-areas:
+        "ai progress progress"
+        "ai main knowledge";
+      max-width: 1720px;
       margin: 0 auto;
-      padding: 32px 20px;
-      gap: 20px;
+      padding: 18px 20px 32px;
+      gap: 16px 20px;
       align-items: flex-start;
     }
-    main { flex: 1; min-width: 0; }
+    main { grid-area: main; min-width: 0; }
 
     /* ==================== SIDEBAR ==================== */
-    .sidebar {
-      width: 200px;
-      flex-shrink: 0;
+    .ai-sidebar {
+      grid-area: ai;
+      width: 0;
+      position: static;
+      max-height: none;
+      transition: width 0.25s ease;
+      z-index: 60;
+    }
+    .ai-sidebar.expanded {
+      width: 320px;
       position: sticky;
       top: 80px;
+      max-height: calc(100vh - 96px);
+    }
+    .ai-drawer-tab {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 160;
+      width: 52px;
+      height: 52px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #5B21B6, #7C3AED);
+      color: #fff;
+      box-shadow: 0 10px 28px rgba(124,58,237,0.32);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    .ai-drawer-tab span {
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .sidebar {
+      grid-area: progress;
+      width: 100%;
+      position: sticky;
+      top: 74px;
+      z-index: 55;
+      background: rgba(245,246,250,0.96);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 8px 10px;
     }
     .sidebar-title {
       font-size: 11px;
@@ -100,17 +149,20 @@
       margin-bottom: 12px;
       padding-left: 4px;
     }
+    .sidebar > .sidebar-title { display: none; }
     .sidebar-steps {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      flex-direction: row;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
     }
     .sidebar-step {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 10px;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 999px;
       cursor: pointer;
       transition: all 0.2s;
       border: 1.5px solid transparent;
@@ -125,16 +177,17 @@
       border-color: var(--gold);
     }
     .sidebar-step.done .ss-num {
-      background: var(--gold);
-      color: #000;
+      background: rgba(200,134,10,0.14);
+      color: var(--gold-dark);
+      border-color: rgba(200,134,10,0.28);
     }
     .sidebar-step.done .ss-num::after {
-      content: '✓';
+      content: none;
     }
     .sidebar-step.done .ss-label { color: var(--gold); }
     .ss-num {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       background: var(--card2);
       border: 1.5px solid var(--border);
@@ -148,11 +201,16 @@
       transition: all 0.2s;
     }
     .sidebar-step.active .ss-num {
-      background: var(--gold);
-      color: #000;
-      border-color: var(--gold);
+      background: #5B4FCF;
+      color: #fff;
+      border-color: #5B4FCF;
+      box-shadow: 0 0 0 4px rgba(91,79,207,0.12);
+    }
+    .sidebar-step.todo .ss-num {
+      opacity: 0.58;
     }
     .ss-label {
+      display: none;
       font-size: 12.5px;
       font-weight: 500;
       color: var(--muted);
@@ -164,8 +222,9 @@
       font-weight: 700;
     }
     .knowledge-sidebar {
-      width: 286px;
-      flex-shrink: 0;
+      grid-area: knowledge;
+      width: 100%;
+      justify-self: stretch;
       position: sticky;
       top: 80px;
       max-height: calc(100vh - 96px);
@@ -245,6 +304,26 @@
       border-radius: 8px;
       padding: 11px;
     }
+    details.knowledge-item {
+      padding: 0;
+      overflow: hidden;
+    }
+    .knowledge-summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 10px 11px;
+    }
+    .knowledge-summary::-webkit-details-marker { display: none; }
+    .knowledge-summary::after {
+      content: '+';
+      float: right;
+      color: var(--gold);
+      font-weight: 900;
+      margin-left: 8px;
+    }
+    details[open] .knowledge-summary::after {
+      content: '-';
+    }
     .knowledge-item-title {
       display: flex;
       align-items: center;
@@ -278,13 +357,13 @@
       font-size: 11.5px;
       line-height: 1.45;
       color: var(--muted);
-      margin-bottom: 7px;
+      margin: 0 11px 7px;
     }
     .knowledge-source {
       font-size: 11px;
       color: var(--muted);
       border-top: 1px dashed var(--border);
-      padding-top: 7px;
+      padding: 7px 11px 10px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -298,7 +377,14 @@
       border-radius: 8px;
     }
     @media (max-width: 860px) {
-      .page-layout { flex-direction: column; padding: 16px; }
+      .page-layout {
+        display: flex;
+        flex-direction: column;
+        padding: 16px;
+      }
+      .ai-sidebar { width: 100%; position: static; max-height: none; }
+      .ai-sidebar.collapsed { width: 100%; }
+      .ai-sidebar.expanded { width: 100%; }
       .sidebar { width: 100%; position: static; }
       .knowledge-sidebar { width: 100%; position: static; max-height: none; }
       .sidebar-steps { flex-direction: row; flex-wrap: wrap; }
@@ -306,12 +392,15 @@
       .ss-label { display: none; }
     }
     @media (max-width: 1180px) and (min-width: 861px) {
-      .page-layout { gap: 14px; padding-left: 12px; padding-right: 12px; }
-      .sidebar { width: 62px; }
+      .page-layout {
+        grid-template-columns: auto minmax(0, 1fr) minmax(240px, 28%);
+        gap: 12px;
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      .ai-sidebar.expanded { width: 280px; }
       .sidebar-title { display: none; }
-      .ss-label { display: none; }
-      .knowledge-sidebar { width: 250px; }
-      .sidebar-step { justify-content: center; padding: 8px; }
+      .knowledge-sidebar { width: 100%; }
     }
 
     /* ==================== STEP CONTAINER ==================== */
@@ -324,9 +413,9 @@
 
     /* ==================== STEP HEADER ==================== */
     .step-head {
-      text-align: center; margin-bottom: 32px;
+      text-align: center; margin-bottom: 22px;
     }
-    .step-icon { font-size: 52px; margin-bottom: 10px; display: block; }
+    .step-icon { font-size: 44px; margin-bottom: 8px; display: block; }
     .step-title { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
     .step-desc { color: var(--muted); font-size: 15px; max-width: 500px; margin: 0 auto; }
 
@@ -335,8 +424,8 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--r2);
-      padding: 24px;
-      margin-bottom: 20px;
+      padding: 20px;
+      margin-bottom: 16px;
     }
     .card-title {
       font-size: 15px; font-weight: 700;
@@ -348,7 +437,7 @@
       border: 1px solid rgba(245,197,24,0.25);
       border-radius: var(--r);
       padding: 16px 20px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .insight-box p { font-size: 14px; color: #4A5068; line-height: 1.7; }
     .insight-box strong { color: var(--gold); }
@@ -379,12 +468,12 @@
 
     /* ==================== BUTTONS ==================== */
     .btn-gold {
-      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
-      color: #000; font-weight: 800; font-size: 15px;
+      background: linear-gradient(135deg, #4F46E5, #7C3AED);
+      color: #fff; font-weight: 800; font-size: 15px;
       padding: 12px 32px; border: none; border-radius: var(--r);
       cursor: pointer; transition: all 0.2s; white-space: nowrap;
     }
-    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,197,24,0.35); }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(91,79,207,0.32); }
     .btn-ghost {
       background: transparent; color: var(--muted); font-size: 15px;
       padding: 12px 24px; border: 1.5px solid var(--border);
@@ -423,11 +512,11 @@
     .tag.active { background: rgba(245,197,24,0.15); border-color: var(--gold); color: var(--gold); font-weight: 700; }
 
     /* ==================== MARKET CARDS ==================== */
-    .market-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .market-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
     @media (max-width: 540px) { .market-grid { grid-template-columns: 1fr; } }
     .market-card {
       background: var(--card2); border: 2px solid var(--border);
-      border-radius: var(--r); padding: 16px; text-align: center;
+      border-radius: var(--r); padding: 12px; text-align: center;
       cursor: pointer; transition: all 0.2s;
     }
     .market-card:hover { border-color: var(--gold); }
@@ -435,7 +524,12 @@
       border-color: var(--gold);
       background: rgba(245,197,24,0.1);
     }
-    .market-card .icon { font-size: 32px; margin-bottom: 6px; }
+    .market-card.confirmed {
+      border-color: #5B4FCF;
+      background: rgba(91,79,207,0.08);
+      box-shadow: 0 0 0 3px rgba(91,79,207,0.08);
+    }
+    .market-card .icon { font-size: 28px; margin-bottom: 4px; }
     .market-card .name { font-weight: 700; font-size: 15px; }
     .market-card .sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
 
@@ -737,6 +831,7 @@
       border-top: 1px solid var(--border);
       padding: 12px; display: flex; justify-content: center; gap: 6px;
       z-index: 50;
+      display: none;
     }
     .dot {
       width: 8px; height: 8px; border-radius: 50%;
@@ -833,6 +928,33 @@
       animation: slideUp 0.25s ease;
     }
     .chat-panel.open { display: flex; }
+    .ai-sidebar .chat-panel {
+      position: static;
+      width: 100%;
+      height: calc(100vh - 96px);
+      min-height: 560px;
+      max-height: calc(100vh - 96px);
+      display: flex;
+      border-radius: var(--r);
+      box-shadow: 0 12px 30px rgba(26,29,46,0.08);
+      animation: none;
+    }
+    .ai-sidebar.collapsed .chat-panel {
+      display: none;
+    }
+    .ai-sidebar.expanded .chat-panel {
+      display: flex;
+    }
+    .ai-sidebar.collapsed .ai-drawer-tab {
+      display: flex;
+    }
+    .ai-sidebar.expanded .ai-drawer-tab {
+      display: flex;
+    }
+    .ai-sidebar .chat-fab,
+    .ai-sidebar.collapsed .chat-close {
+      display: none;
+    }
     .chat-header {
       padding: 14px 16px; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
@@ -847,9 +969,9 @@
     .chat-close:hover { color: #fff; }
     .chat-messages {
       flex: 1; overflow-y: auto; padding: 14px;
-      display: flex; flex-direction: column; gap: 10px;
+      display: flex; flex-direction: column; gap: 12px;
     }
-    .chat-msg { max-width: 88%; font-size: 13px; line-height: 1.65; }
+    .chat-msg { max-width: 88%; font-size: 13px; line-height: 1.62; }
     .chat-msg.user {
       align-self: flex-end;
       background: linear-gradient(135deg, #5B21B6, #7C3AED);
@@ -858,7 +980,59 @@
     .chat-msg.ai {
       align-self: flex-start; background: var(--bg2);
       border: 1px solid var(--border); border-radius: 14px 14px 14px 2px;
-      padding: 9px 13px; white-space: pre-wrap;
+      padding: 12px 14px; white-space: normal;
+      max-width: 94%;
+    }
+    .chat-msg.ai strong {
+      color: var(--text);
+      font-weight: 800;
+    }
+    .chat-md-heading {
+      font-size: 14px;
+      font-weight: 850;
+      color: var(--text);
+      line-height: 1.35;
+      margin: 0 0 10px;
+    }
+    .chat-md-section {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(85,91,120,0.16);
+    }
+    .chat-md-section:first-child {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: 0;
+    }
+    .chat-md-p {
+      margin: 0 0 9px;
+    }
+    .chat-md-list {
+      display: grid;
+      gap: 7px;
+      margin: 8px 0 10px;
+    }
+    .chat-md-li {
+      display: grid;
+      grid-template-columns: 20px minmax(0,1fr);
+      gap: 7px;
+      align-items: start;
+    }
+    .chat-md-mark {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: rgba(124,58,237,0.1);
+      color: #6D28D9;
+      font-size: 11px;
+      font-weight: 850;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .chat-md-li-body {
+      min-width: 0;
     }
     .chat-input-area {
       padding: 10px 12px; border-top: 1px solid var(--border);
@@ -878,7 +1052,14 @@
     }
     .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     @media (max-width: 480px) {
-      .chat-panel { width: calc(100vw - 32px); right: 16px; }
+      .ai-sidebar.collapsed .chat-panel {
+        display: none;
+      }
+      .ai-sidebar .chat-panel {
+        height: 420px;
+        min-height: 420px;
+        max-height: 420px;
+      }
       .chat-fab { right: 16px; }
     }
   </style>
@@ -903,6 +1084,30 @@
 </header>
 
 <div class="page-layout">
+
+<!-- AI CHAT SIDEBAR -->
+<aside class="ai-sidebar collapsed no-print" id="ai-sidebar" aria-label="AI 报价顾问">
+  <button class="ai-drawer-tab" type="button" onclick="toggleChat()" title="打开 AI 报价顾问">
+    💬
+    <span>AI</span>
+  </button>
+  <div class="chat-panel open" id="chat-panel">
+    <div class="chat-header">
+      <div>
+        <div class="chat-header-title">AI 报价顾问</div>
+        <div class="chat-header-sub">DeepSeek · Hormozi $100M Offers 专家</div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">×</button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-msg ai">你好！我是你的 AI 报价顾问，专注于 Alex Hormozi 的《$100M Offers》方法论。有任何关于定价策略、价值堆叠、保证设计或报价命名的问题，尽管问我！</div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="chat-input" placeholder="问任何关于报价设计的问题..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}">
+      <button class="chat-send-btn" id="chat-send-btn" onclick="sendChatMessage()">↑</button>
+    </div>
+  </div>
+</aside>
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -968,6 +1173,7 @@
   </div>
 
   <div class="card">
+    <h1 class="card-title">选择你的利基市场</h1>
     <div class="card-title">📌 三大永恒市场（任选其一）</div>
     <div class="market-grid" id="market-grid">
       <div class="market-card active" data-market="health" onclick="selectMarket(this,'health')">
@@ -985,6 +1191,9 @@
         <div class="name">关系</div>
         <div class="sub">感情 · 婚姻 · 社交 · 育儿</div>
       </div>
+    </div>
+    <div class="insight-box" id="market-confirm" style="display:none;margin-bottom:16px">
+      <p><strong>已选择：</strong><span id="market-confirm-text">健康市场</span>。接下来请把它收窄成一个具体、有付费意愿的人群和场景。</p>
     </div>
 
     <div class="field">
@@ -1759,25 +1968,6 @@
 <!-- STEP DOTS -->
 <div class="dots-nav no-print" id="dots-nav"></div>
 
-<!-- AI Chat Widget -->
-<button class="chat-fab no-print" id="chat-fab" onclick="toggleChat()" title="AI 报价顾问">💬</button>
-<div class="chat-panel no-print" id="chat-panel">
-  <div class="chat-header">
-    <div>
-      <div class="chat-header-title">AI 报价顾问</div>
-      <div class="chat-header-sub">DeepSeek · Hormozi $100M Offers 专家</div>
-    </div>
-    <button class="chat-close" onclick="toggleChat()">×</button>
-  </div>
-  <div class="chat-messages" id="chat-messages">
-    <div class="chat-msg ai">你好！我是你的 AI 报价顾问，专注于 Alex Hormozi 的《$100M Offers》方法论。有任何关于定价策略、价值堆叠、保证设计或报价命名的问题，尽管问我！</div>
-  </div>
-  <div class="chat-input-area">
-    <input type="text" id="chat-input" placeholder="问任何关于报价设计的问题..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}">
-    <button class="chat-send-btn" id="chat-send-btn" onclick="sendChatMessage()">↑</button>
-  </div>
-</div>
-
 <!-- AI Quick Generate Modal -->
 <div class="ai-modal-overlay no-print" id="quick-gen-modal" onclick="if(event.target===this)closeQuickGenModal()">
   <div class="ai-modal">
@@ -1874,12 +2064,12 @@ function updateSidebar(n) {
     if (!el) continue;
     if (i < n) {
       el.className = 'sidebar-step done';
-      el.querySelector('.ss-num').textContent = '';
+      el.querySelector('.ss-num').textContent = i;
     } else if (i === n) {
       el.className = 'sidebar-step active';
       el.querySelector('.ss-num').textContent = i;
     } else {
-      el.className = 'sidebar-step';
+      el.className = 'sidebar-step todo';
       el.querySelector('.ss-num').textContent = i;
     }
   }
@@ -1967,15 +2157,17 @@ function renderKnowledgeIndex(moduleName = activeKnowledgeModule) {
   }
 
   list.innerHTML = items.map(item => `
-    <article class="knowledge-item">
+    <details class="knowledge-item">
+      <summary class="knowledge-summary">
       <div class="knowledge-item-title">
         <span><span class="knowledge-id">${escapeHtml(item.id)}</span> · ${escapeHtml(item.module)}</span>
         <span class="knowledge-page">PDF ${escapeHtml(item.source?.pdfPages)}</span>
       </div>
       <div class="knowledge-principle">${escapeHtml(item.principle)}</div>
+      </summary>
       <div class="knowledge-action">${escapeHtml(item.action)}</div>
       <div class="knowledge-source" title="${escapeHtml(item.chapter)}">出处：${escapeHtml(item.chapter)}</div>
-    </article>
+    </details>
   `).join('');
 }
 
@@ -1987,9 +2179,16 @@ renderKnowledgeIndex(STEP_KNOWLEDGE_MODULE[1]);
 // STEP 1: MARKET
 // =====================================================================
 function selectMarket(el, market) {
-  document.querySelectorAll('.market-card').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
+  document.querySelectorAll('.market-card').forEach(c => c.classList.remove('active', 'confirmed'));
+  el.classList.add('active', 'confirmed');
   selectedMarket = market;
+  const labelMap = { health: '健康市场', wealth: '财富市场', relationships: '关系市场' };
+  const confirm = document.getElementById('market-confirm');
+  const text = document.getElementById('market-confirm-text');
+  if (confirm && text) {
+    text.textContent = labelMap[market] || '当前市场';
+    confirm.style.display = 'block';
+  }
 }
 
 // =====================================================================
@@ -2769,8 +2968,91 @@ function buildKnowledgeContext(query) {
   )).join('\n');
 }
 
+function renderChatMarkdown(text) {
+  const inline = (value) => escapeHtml(value)
+    .replace(/\*\*([^*\n][\s\S]*?[^*\n])\*\*/g, '<strong>$1</strong>');
+  const lines = String(text || '').replace(/\r\n/g, '\n').split('\n');
+  const blocks = [];
+  let paragraph = [];
+  let list = [];
+
+  const flushParagraph = () => {
+    if (!paragraph.length) return;
+    blocks.push(`<p class="chat-md-p">${inline(paragraph.join(' '))}</p>`);
+    paragraph = [];
+  };
+  const flushList = () => {
+    if (!list.length) return;
+    blocks.push(`<div class="chat-md-list">${list.map(({ mark, body }) => `
+      <div class="chat-md-li">
+        <span class="chat-md-mark">${inline(mark)}</span>
+        <div class="chat-md-li-body">${inline(body)}</div>
+      </div>
+    `).join('')}</div>`);
+    list = [];
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) {
+      flushParagraph();
+      flushList();
+      continue;
+    }
+
+    const heading = line.match(/^#{1,4}\s+(.+)$/);
+    if (heading) {
+      flushParagraph();
+      flushList();
+      blocks.push(`<div class="chat-md-heading">${inline(heading[1])}</div>`);
+      continue;
+    }
+
+    const numbered = line.match(/^(\d+)[\.、]\s*(.+)$/);
+    if (numbered) {
+      flushParagraph();
+      list.push({ mark: numbered[1], body: numbered[2] });
+      continue;
+    }
+
+    const bullet = line.match(/^[-•]\s*(.+)$/);
+    if (bullet) {
+      flushParagraph();
+      list.push({ mark: '•', body: bullet[1] });
+      continue;
+    }
+
+    if (list.length && /^[例参出]/.test(line)) {
+      list[list.length - 1].body += ` ${line}`;
+      continue;
+    }
+
+    flushList();
+    paragraph.push(line);
+  }
+
+  flushParagraph();
+  flushList();
+  return `<div class="chat-md-section">${blocks.join('')}</div>`;
+}
+
 function toggleChat() {
+  const sidebar = document.getElementById('ai-sidebar');
   const panel = document.getElementById('chat-panel');
+  if (sidebar) {
+    sidebar.classList.toggle('collapsed');
+    sidebar.classList.toggle('expanded');
+    if (sidebar.classList.contains('expanded')) {
+      panel.classList.add('open');
+      const trigger = sidebar.querySelector('.ai-drawer-tab');
+      if (trigger) trigger.title = '收起 AI 报价顾问';
+      document.getElementById('chat-input').focus();
+    } else {
+      const trigger = sidebar.querySelector('.ai-drawer-tab');
+      if (trigger) trigger.title = '打开 AI 报价顾问';
+    }
+    return;
+  }
   panel.classList.toggle('open');
   if (panel.classList.contains('open')) document.getElementById('chat-input').focus();
 }
@@ -2798,13 +3080,14 @@ async function sendChatMessage() {
       chatHistory[0],
       {
         role: 'system',
-        content: `当前报价上下文：\n${getCurrentOfferSnapshot()}\n\n可引用的知识点出处：\n${sourceContext}\n\n回答规则：优先基于这些知识点给建议；每次给出方法论建议时，末尾加“参考出处：”并列出用到的知识点编号、章节和PDF页码；不要编造不存在的页码。`
+        content: `当前报价上下文：\n${getCurrentOfferSnapshot()}\n\n可引用的知识点出处：\n${sourceContext}\n\n回答规则：优先基于这些知识点给建议；排版适合窄聊天栏，最多使用一个短标题，正文用短段落和编号列表；每条建议尽量控制在2行内；末尾加“参考出处：”并列出用到的知识点编号、章节和PDF页码；不要编造不存在的页码。`
       },
       ...chatHistory.slice(1)
     ];
     const result = await callDeepSeek(contextualMessages, { stream: true, onChunk: (t) => {
-      aiEl.textContent = t; msgs.scrollTop = msgs.scrollHeight;
+      aiEl.innerHTML = renderChatMarkdown(t); msgs.scrollTop = msgs.scrollHeight;
     }});
+    aiEl.innerHTML = renderChatMarkdown(result);
     chatHistory.push({ role: 'assistant', content: result });
     if (chatHistory.length > 22) chatHistory.splice(1, 2);
   } catch(e) {
